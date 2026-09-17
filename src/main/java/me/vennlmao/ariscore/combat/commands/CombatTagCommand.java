@@ -65,8 +65,9 @@ public class CombatTagCommand implements CommandExecutor, TabCompleter {
 
         module.getCombatManager().tag(target, seconds, true, sender);
 
+        int finalSeconds = seconds;
         MessageUtil.sendChatList(sender, "admin_tag_sender",
-                s -> s.replace("{player}", target.getName()).replace("{seconds}", String.valueOf(seconds)));
+                s -> s.replace("{player}", target.getName()).replace("{seconds}", String.valueOf(finalSeconds)));
 
         return true;
     }
@@ -90,4 +91,4 @@ public class CombatTagCommand implements CommandExecutor, TabCompleter {
 
         return List.of();
     }
-}
+                                  }
