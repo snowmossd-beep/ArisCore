@@ -1,0 +1,74 @@
+combat:
+  default-seconds: 15
+  punish-on-quit: true
+  punish-on-kick: true
+  drop-items-on-punish: true
+  glowing-enabled: true
+  lightning-on-death: true
+  actionbar-interval-ticks: 20
+  command-permission: "ariscore.combat.tag"
+  reload-permission: "ariscore.combat.reload"
+
+item-cooldown:
+  enabled: true
+  items:
+    - "ender-pearl:16"
+    - "trident:10"
+
+commands:
+  allowed-in-combat:
+    - "msg"
+    - "tell"
+    - "r"
+    - "reply"
+    - "help"
+    - "list"
+
+sounds:
+  tag:
+    sound: ENTITY_PLAYER_HURT
+    volume: 1.0
+    pitch: 1.0
+  combat_end:
+    sound: ENTITY_EXPERIENCE_ORB_PICKUP
+    volume: 1.0
+    pitch: 1.2
+  admin_tag:
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 1.0
+    pitch: 1.0
+  cooldown:
+    sound: ENTITY_VILLAGER_NO
+    volume: 1.0
+    pitch: 1.0
+  error:
+    sound: ENTITY_VILLAGER_NO
+    volume: 1.0
+    pitch: 1.0
+
+messages:
+  combat_end:
+    - "&aBạn đã hết combat."
+  combat_end_ab: "&aĐã hết combat!"
+  combat_actionbar: "&c⚔ Combat: &f{seconds}s &7| &cĐang đánh: &f{attacker}"
+  killed_on_quit:
+    - "&c{player} đã thoát trong lúc combat và bị tiêu diệt!"
+  killed_on_kick:
+    - "&c{player} đã bị kick trong lúc combat và bị tiêu diệt!"
+  command_blocked_in_combat:
+    - "&cLệnh &f/{command} &ckhông được phép sử dụng khi đang combat!"
+  reload_success:
+    - "&aĐã reload combat module."
+  item_cooldown:
+    - "&cBạn cần chờ &f{seconds}s &cđể dùng lại &f{item}&c!"
+  item_cooldown_ab: "&cChờ {seconds}s để dùng {item}!"
+  admin_tag_sender:
+    - "&aĐã cho &f{player} &avào combat trong &f{seconds} &agiây."
+  admin_tag_target:
+    - "&cBạn đã bị đưa vào combat trong &f{seconds} &cgiây bởi &f{sender}&c."
+  player_not_found:
+    - "&cKhông tìm thấy người chơi này."
+  invalid_seconds:
+    - "&cSố giây không hợp lệ, đã dùng mặc định &f{seconds} &cgiây."
+  no_permission:
+    - "&cBạn không có quyền sử dụng lệnh này."

@@ -1,0 +1,26 @@
+license-key: "FREE-LICENSE-ARISCOTE-ab91-0b23257da8d3"
+
+warmup-message:
+  chat: true
+  actionbar: true
+
+modules:
+  shards: true
+  team: true
+  tpa: true
+  rtp: true
+  rtpqueue: true
+  combat: true
+  home: true
+  shop: true
+  auction: true
+  sell: true
+  tab: true
+  order: true
+  spawn: true
+  afk: true
+  warp: true
+  crates: true
+  amethyst: true
+  duel: true
+  spawners: true

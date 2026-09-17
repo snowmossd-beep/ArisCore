@@ -1,0 +1,176 @@
+refresh-interval-ticks: 20
+
+queue:
+  max_players: 2
+  max_attempts: 20
+  countdown: 5
+
+title-defaults:
+  fade-in: 5
+  stay: 40
+  fade-out: 10
+
+titles:
+  queue_countdown_title: "<gold><bold>{seconds}"
+  queue_countdown_subtitle: "<gray>Đang dịch chuyển ngẫu nhiên..."
+
+sounds:
+  open_gui:
+    sound: BLOCK_CHEST_OPEN
+    volume: 1.0
+    pitch: 1.0
+  click:
+    sound: UI_BUTTON_CLICK
+    volume: 1.0
+    pitch: 1.0
+  confirm:
+    sound: ENTITY_EXPERIENCE_ORB_PICKUP
+    volume: 1.0
+    pitch: 1.0
+  queue_join:
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 1.0
+    pitch: 1.2
+  countdown:
+    sound: BLOCK_NOTE_BLOCK_HAT
+    volume: 1.0
+    pitch: 1.2
+  queue_full:
+    sound: BLOCK_PORTAL_TRIGGER
+    volume: 0.6
+    pitch: 1.5
+  teleport_success:
+    sound: ENTITY_ENDERMAN_TELEPORT
+    volume: 1.0
+    pitch: 1.0
+  cancel:
+    sound: BLOCK_NOTE_BLOCK_BASS
+    volume: 1.0
+    pitch: 0.8
+  error:
+    sound: ENTITY_VILLAGER_NO
+    volume: 1.0
+    pitch: 1.0
+
+messages:
+  joined_queue:
+    - "&aBạn đã vào hàng đợi &#00A3FB({current}/{max})&a."
+  joined_queue_ab: "&aĐã vào hàng đợi &#00A3FB({current}/{max})"
+  left_queue:
+    - "&cBạn đã hủy vào hàng đợi."
+  left_queue_ab: "&cĐã hủy hàng đợi."
+  already_queued:
+    - "&cBạn đã ở trong hàng đợi rồi."
+  not_queued:
+    - "&cBạn không ở trong hàng đợi."
+  queue_full_notice:
+    - "&aĐã đủ &#00A3FB{max} &angười, chuẩn bị dịch chuyển sau &#00A3FB{seconds} &agiây..."
+  queue_full_notice_ab: "&aChuẩn bị dịch chuyển sau {seconds} giây..."
+  searching_location:
+    - "&7Đang tìm vị trí an toàn..."
+  searching_location_ab: "&7Đang tìm vị trí an toàn..."
+  no_safe_location:
+    - "&cKhông tìm được vị trí an toàn!"
+  no_safe_location_ab: "&cKhông tìm được vị trí an toàn!"
+  teleport_success:
+    - "&aĐã dịch chuyển ngẫu nhiên đến &#00A3FB{world}&a!"
+  teleport_success_ab: "&aDịch chuyển thành công!"
+  world_disabled:
+    - "&cWorld này hiện không khả dụng."
+  no_world_configured:
+    - "&cChưa có world nào được cấu hình."
+
+gui:
+  main:
+    title: "&8ʜᴀ̀ɴɢ ᴆᴏ̛̣ɪ ʀᴀɴᴅᴏᴍ ᴛᴇʟᴇᴘᴏʀᴛ"
+    size: 27
+    slots:
+      cancel:
+        slot: 10
+        material: RED_STAINED_GLASS_PANE
+        display-name: "&cHủy vào hàng đợi"
+        lore-idle:
+          - "&7Bạn hiện không ở trong hàng đợi."
+        lore-queued:
+          - "&7Nhấn để hủy vào hàng đợi."
+      world:
+        slot: 12
+        material: COMPASS
+        display-name: "&bChọn world dịch chuyển"
+        no-selection: "&7Ngẫu nhiên"
+        lore:
+          - "&7World hiện tại: &f{selected_world}"
+          - ""
+          - "&7Nhấn để chọn world dịch chuyển."
+      info:
+        slot: 13
+        material: PAPER
+        display-name: "&eThông tin hàng đợi"
+        lore:
+          - "&7Số người trong hàng đợi:"
+          - "&f{current}&7/&f{max}"
+      ping:
+        slot: 14
+        material: CLOCK
+        display-name: "&dPing của bạn"
+        lore:
+          - "&7Ping hiện tại: &f{ping}ms"
+      confirm:
+        slot: 16
+        material: EMERALD
+        display-name: "&aXác nhận vào hàng đợi"
+        lore:
+          - "&7Nhấn để vào hàng đợi random teleport."
+  world_select:
+    title: "&8ᴄʜᴏ̣ɴ ᴡᴏʀʟᴅ ᴅɪ̣ᴄʜ ᴄʜᴜʏᴇ̂̉ɴ"
+    size: 27
+
+worlds:
+  overworld:
+    enabled: true
+    display-name: "&#55FF55ᴏᴠᴇʀᴡᴏʀʟᴅ"
+    material: GRASS_BLOCK
+    slot: 11
+    world: world
+    min_x: -5000
+    max_x: 5000
+    min_z: -5000
+    max_z: 5000
+    min_y: 60
+    max_y: 250
+    lore:
+      - "&fNhấn để chọn world này"
+    lore-selected:
+      - "&aĐang được chọn"
+  nether:
+    enabled: true
+    display-name: "&#FF5555ɴᴇᴛʜᴇʀ"
+    material: NETHERRACK
+    slot: 13
+    world: world_nether
+    min_x: -3000
+    max_x: 3000
+    min_z: -3000
+    max_z: 3000
+    min_y: 30
+    max_y: 120
+    lore:
+      - "&fNhấn để chọn world này"
+    lore-selected:
+      - "&aĐang được chọn"
+  end:
+    enabled: true
+    display-name: "&#FFFF55ᴇɴᴅ"
+    material: END_STONE
+    slot: 15
+    world: world_the_end
+    min_x: -1000
+    max_x: 1000
+    min_z: -1000
+    max_z: 1000
+    min_y: 40
+    max_y: 100
+    lore:
+      - "&fNhấn để chọn world này"
+    lore-selected:
+      - "&aĐang được chọn"

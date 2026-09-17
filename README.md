@@ -1,1 +1,1 @@
-# ArisCore
+# Ariscore
