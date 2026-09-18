@@ -59,9 +59,6 @@ messages:
     - "&cLệnh &f/{command} &ckhông được phép sử dụng khi đang combat!"
   reload_success:
     - "&aĐã reload combat module."
-  item_cooldown:
-    - "&cBạn cần chờ &f{seconds}s &cđể dùng lại &f{item}&c!"
-  item_cooldown_ab: "&cChờ {seconds}s để dùng {item}!"
   admin_tag_sender:
     - "&aĐã cho &f{player} &avào combat trong &f{seconds} &agiây."
   admin_tag_target:
