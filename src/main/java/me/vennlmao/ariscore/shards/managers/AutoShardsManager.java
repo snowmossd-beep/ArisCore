@@ -60,7 +60,7 @@ public class AutoShardsManager {
     private void tickAuto(Player player) {
         if (!module.getConfig().getBoolean("auto-shards.enabled")) return;
         if (!player.hasPermission(module.getConfig().getString("auto-shards.permission"))) return;
-        if (isBlocked(player, "auto-shards")) return;
+        if (!isAllowed(player, "auto-shards")) return;
 
         UUID uuid = player.getUniqueId();
         int interval = module.getConfig().getInt("auto-shards.interval");
@@ -85,7 +85,7 @@ public class AutoShardsManager {
     private void tickAfk(Player player) {
         if (!module.getConfig().getBoolean("afk-shards.enabled")) return;
         if (!player.hasPermission(module.getConfig().getString("afk-shards.permission"))) return;
-        if (isBlocked(player, "afk-shards")) return;
+        if (!isAllowed(player, "afk-shards")) return;
 
         UUID uuid = player.getUniqueId();
         int interval = module.getConfig().getInt("afk-shards.interval");
@@ -110,12 +110,12 @@ public class AutoShardsManager {
         }
     }
 
-    private boolean isBlocked(Player player, String section) {
-        List<String> blockedWorlds = module.getConfig().getStringList(section + ".blocked_worlds");
-        if (!blockedWorlds.isEmpty() && blockedWorlds.contains(player.getWorld().getName())) return true;
+    private boolean isAllowed(Player player, String section) {
+        List<String> allowWorlds = module.getConfig().getStringList(section + ".allow_worlds");
+        if (!allowWorlds.isEmpty() && !allowWorlds.contains(player.getWorld().getName())) return false;
 
-        List<String> blockedRegions = module.getConfig().getStringList(section + ".blocked_regions");
-        if (blockedRegions.isEmpty()) return false;
+        List<String> allowRegions = module.getConfig().getStringList(section + ".allow_regions");
+        if (allowRegions.isEmpty()) return true;
 
         try {
             RegionManager rm = WorldGuard.getInstance().getPlatform()
@@ -124,10 +124,10 @@ public class AutoShardsManager {
             com.sk89q.worldguard.protection.ApplicableRegionSet regions =
                     rm.getApplicableRegions(BukkitAdapter.adapt(player.getLocation()).toVector().toBlockPoint());
             for (ProtectedRegion region : regions) {
-                if (blockedRegions.contains(region.getId())) return true;
+                if (allowRegions.contains(region.getId())) return true;
             }
         } catch (Exception ignored) {}
 
         return false;
     }
-}
+    }
