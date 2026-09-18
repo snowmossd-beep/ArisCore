@@ -33,8 +33,8 @@ storage:
     slot: 49
     display-name: "&#00fc88%spawner_name% Spawner"
     lore:
-      - "&#00fc88%amount% &f%item%"
-      - "&#00fc88(%pct%% filled)"
+      - "&#00fc88%amount% &fitems trong kho"
+      - "&#00fc88Stack: &f%stack%"
   back:
     material: "BARRIER"
     slot: 45
@@ -83,3 +83,4 @@ confirm-gui:
       lore:
         - "&fClick to sell all items"
         - "&7(%items_value%)"
+        
