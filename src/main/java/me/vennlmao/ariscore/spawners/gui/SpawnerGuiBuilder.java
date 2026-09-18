@@ -18,6 +18,8 @@ import java.util.Map;
 
 public class SpawnerGuiBuilder {
 
+    public static final int STORAGE_PAGE_SIZE = 45;
+
     public static Inventory buildInfo(SpawnersModule module, SpawnerData data) {
         FileConfiguration gui = module.getGuiConfig();
         MobSpawnerDefinition def = module.getSpawnerDefinitionManager().get(data.getEntityType());
@@ -72,36 +74,33 @@ public class SpawnerGuiBuilder {
         int size = gui.getInt("storage.size", 54);
         String title = def != null ? def.getTitle().replace("%amount%", String.valueOf(data.getAmount())) : "Storage";
 
-        List<Material> materials = def != null && !def.getItemLayoutOrder().isEmpty()
-                ? def.getItemLayoutOrder()
-                : new ArrayList<>(data.getStorage().keySet());
-        int maxPage = Math.max(0, materials.size() - 1);
+        int maxPage = maxPage(data);
         page = Math.max(0, Math.min(page, maxPage));
 
         SpawnerGuiHolder holder = new SpawnerGuiHolder(SpawnerGuiHolder.Screen.STORAGE, data, null, page);
         Inventory inv = Bukkit.createInventory(holder, size, ColorUtil.parse(title));
         holder.setInventory(inv);
 
+        List<ItemStack> pageItems = pageItems(data, page);
+        for (int i = 0; i < pageItems.size() && i < STORAGE_PAGE_SIZE; i++) {
+            inv.setItem(i, pageItems.get(i));
+        }
+
         String base = "storage.storage";
         int slot = gui.getInt(base + ".slot", 49);
-        ItemStack storageIcon = new ItemStack(Material.CHEST);
-        long maxPerMaterial = module.getConfig().getLong("storage.max-per-material", 999999999L);
-        if (!materials.isEmpty()) {
-            Material mat = materials.get(page);
-            long qty = data.getStoredCount(mat);
-            storageIcon = new ItemStack(mat, (int) Math.max(1, Math.min(qty, 64)));
-            double pct = maxPerMaterial > 0 ? (qty * 100.0 / maxPerMaterial) : 0;
-            applyDisplay(storageIcon, ColorUtil.parse(fillPlaceholders(module, GuiConfigUtil.getName(gui, base), data, def, -1)));
-            List<String> lore = new ArrayList<>();
-            for (String line : GuiConfigUtil.getLore(gui, base + ".lore")) {
-                lore.add(line
-                        .replace("%amount%", String.valueOf(qty))
-                        .replace("%item%", niceName(mat))
-                        .replace("%pct%", String.format("%.0f", pct))
-                        .replace("%spawner_name%", def != null ? def.getSpawnerName() : ""));
-            }
-            applyLore(storageIcon, lore);
+        ItemStack storageIcon = def != null
+                ? me.vennlmao.ariscore.spawners.utils.SpawnerSkullUtil.fromMaterialSpec(def.getMaterial())
+                : new ItemStack(Material.PLAYER_HEAD);
+        applyDisplay(storageIcon, ColorUtil.parse(fillPlaceholders(module, GuiConfigUtil.getName(gui, base), data, def, -1)));
+        List<String> lore = new ArrayList<>();
+        long totalItems = data.totalStoredItems();
+        for (String line : GuiConfigUtil.getLore(gui, base + ".lore")) {
+            lore.add(line
+                    .replace("%amount%", String.valueOf(totalItems))
+                    .replace("%stack%", String.valueOf(data.getAmount()))
+                    .replace("%spawner_name%", def != null ? def.getSpawnerName() : ""));
         }
+        applyLore(storageIcon, lore);
         inv.setItem(slot, storageIcon);
 
         putSimpleButton(gui, inv, "storage.back", data, def, module);
@@ -111,6 +110,32 @@ public class SpawnerGuiBuilder {
         putSimpleButton(gui, inv, "storage.sell-all", data, def, module);
 
         return inv;
+    }
+
+    public static List<ItemStack> flattenStorage(SpawnerData data) {
+        List<ItemStack> flat = new ArrayList<>();
+        for (Map.Entry<Material, Long> entry : data.getStorage().entrySet()) {
+            long remaining = entry.getValue();
+            while (remaining > 0) {
+                int give = (int) Math.min(remaining, 64);
+                flat.add(new ItemStack(entry.getKey(), give));
+                remaining -= give;
+            }
+        }
+        return flat;
+    }
+
+    public static int maxPage(SpawnerData data) {
+        int totalStacks = flattenStorage(data).size();
+        if (totalStacks <= 0) return 0;
+        return (totalStacks - 1) / STORAGE_PAGE_SIZE;
+    }
+
+    public static List<ItemStack> pageItems(SpawnerData data, int page) {
+        List<ItemStack> flat = flattenStorage(data);
+        int from = page * STORAGE_PAGE_SIZE;
+        if (from >= flat.size()) return List.of();
+        return new ArrayList<>(flat.subList(from, Math.min(flat.size(), from + STORAGE_PAGE_SIZE)));
     }
 
     public static Inventory buildConfirm(SpawnersModule module, SpawnerData data, SpawnerGuiHolder.Screen returnTo) {
@@ -245,7 +270,7 @@ public class SpawnerGuiBuilder {
         item.setItemMeta(meta);
     }
 
-    private static String niceName(Material material) {
+    public static String niceName(Material material) {
         String raw = material.name().replace("_", " ").toLowerCase();
         StringBuilder sb = new StringBuilder();
         for (String word : raw.split(" ")) {
@@ -254,4 +279,5 @@ public class SpawnerGuiBuilder {
         }
         return sb.toString().trim();
     }
-}
+        }
+            
