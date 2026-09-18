@@ -95,7 +95,7 @@ gui:
           - "&7Nhấn để hủy vào hàng đợi."
       world:
         slot: 12
-        material: COMPASS
+        material: GRASS_BLICK
         display-name: "&bChọn world dịch chuyển"
         no-selection: "&7Ngẫu nhiên"
         lore:
@@ -104,20 +104,20 @@ gui:
           - "&7Nhấn để chọn world dịch chuyển."
       info:
         slot: 13
-        material: PAPER
+        material: COMPASS
         display-name: "&eThông tin hàng đợi"
         lore:
           - "&7Số người trong hàng đợi:"
           - "&f{current}&7/&f{max}"
       ping:
         slot: 14
-        material: CLOCK
+        material: PLAYER_HEAD
         display-name: "&dPing của bạn"
         lore:
           - "&7Ping hiện tại: &f{ping}ms"
       confirm:
         slot: 16
-        material: EMERALD
+        material: LIME_STAINED_GLASS_PANE
         display-name: "&aXác nhận vào hàng đợi"
         lore:
           - "&7Nhấn để vào hàng đợi random teleport."
@@ -174,3 +174,4 @@ worlds:
       - "&fNhấn để chọn world này"
     lore-selected:
       - "&aĐang được chọn"
+      
