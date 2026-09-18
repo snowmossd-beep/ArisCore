@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +30,7 @@ public class GuiUtil {
 
     public static void updateDynamicSlots(RtpQueueModule module, Inventory inv, Player player) {
         boolean queued = module.getQueueManager().isQueued(player.getUniqueId());
-        applyCancelItem(module, inv, queued);
+        applyCancelItem(module, inv, queued, player);
         applyInfoItem(module, inv, player);
         applyPingItem(module, inv, player);
         applyWorldItem(module, inv, player);
@@ -55,10 +56,10 @@ public class GuiUtil {
             replaced.add(line.replace("{selected_world}", worldDisplay));
         }
 
-        inv.setItem(slot, buildItem(sec, replaced, null));
+        inv.setItem(slot, buildItem(sec, replaced, player));
     }
 
-    private static void applyCancelItem(RtpQueueModule module, Inventory inv, boolean queued) {
+    private static void applyCancelItem(RtpQueueModule module, Inventory inv, boolean queued, Player player) {
         ConfigurationSection sec = module.getConfig().getConfigurationSection("gui.main.slots.cancel");
         if (sec == null) return;
         int slot = sec.getInt("slot", -1);
@@ -68,7 +69,7 @@ public class GuiUtil {
         List<String> lore = sec.getStringList(path);
         if (lore.isEmpty()) lore = sec.getStringList("lore");
 
-        inv.setItem(slot, buildItem(sec, lore, null));
+        inv.setItem(slot, buildItem(sec, lore, player));
     }
 
     private static void applyInfoItem(RtpQueueModule module, Inventory inv, Player player) {
@@ -86,7 +87,7 @@ public class GuiUtil {
             replaced.add(line.replace("{current}", String.valueOf(current)).replace("{max}", String.valueOf(max)));
         }
 
-        inv.setItem(slot, buildItem(sec, replaced, null));
+        inv.setItem(slot, buildItem(sec, replaced, player));
     }
 
     private static void applyPingItem(RtpQueueModule module, Inventory inv, Player player) {
@@ -112,7 +113,7 @@ public class GuiUtil {
         int slot = sec.getInt("slot", -1);
         if (slot < 0 || slot >= size) return;
 
-        inv.setItem(slot, buildItem(sec, sec.getStringList("lore"), null));
+        inv.setItem(slot, buildItem(sec, sec.getStringList("lore"), player));
     }
 
     public static Inventory buildWorldSelectGui(RtpQueueModule module, Player player) {
@@ -136,18 +137,29 @@ public class GuiUtil {
             List<String> lore = sec.getStringList(isSelected ? "lore-selected" : "lore");
             if (lore.isEmpty()) lore = sec.getStringList("lore");
 
-            inv.setItem(slot, buildItem(sec, lore, null));
+            inv.setItem(slot, buildItem(sec, lore, player));
         }
 
         return inv;
     }
 
-    private static ItemStack buildItem(ConfigurationSection sec, List<String> lore, Player unused) {
+    private static ItemStack buildItem(ConfigurationSection sec, List<String> lore, Player player) {
         String matName = sec.getString("material", "STONE");
-        Material mat = Material.matchMaterial(matName);
-        if (mat == null) mat = Material.STONE;
+        ItemStack item;
 
-        ItemStack item = new ItemStack(mat);
+        if (matName.equalsIgnoreCase("PLAYER_HEAD_SELF") && player != null) {
+            item = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
+            if (skullMeta != null) {
+                skullMeta.setOwningPlayer(player);
+                item.setItemMeta(skullMeta);
+            }
+        } else {
+            Material mat = Material.matchMaterial(matName);
+            if (mat == null) mat = Material.STONE;
+            item = new ItemStack(mat);
+        }
+
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
 
@@ -170,4 +182,4 @@ public class GuiUtil {
                 .replaceAll("&#[0-9A-Fa-f]{6}", "")
                 .trim();
     }
-}
+    }
