@@ -1,7 +1,6 @@
 package me.vennlmao.ariscore.combat.listeners;
 
 import me.vennlmao.ariscore.combat.CombatModule;
-import me.vennlmao.ariscore.combat.utils.MessageUtil;
 import me.vennlmao.ariscore.combat.utils.SoundUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -37,30 +36,16 @@ public class ItemCooldownListener implements Listener {
         Player player = event.getPlayer();
         UUID id = player.getUniqueId();
 
+        if (!module.getCombatManager().isInCombat(id)) return;
+
         if (module.getItemCooldownManager().isOnCooldown(id, material)) {
             event.setCancelled(true);
-            int remaining = module.getItemCooldownManager().getRemainingSeconds(id, material);
-            String itemName = formatItemName(material);
-
-            MessageUtil.sendChatList(player, "item_cooldown",
-                    s -> s.replace("{seconds}", String.valueOf(remaining)).replace("{item}", itemName));
-            MessageUtil.sendActionbar(player, "item_cooldown_ab",
-                    s -> s.replace("{seconds}", String.valueOf(remaining)).replace("{item}", itemName));
             SoundUtil.play(player, "cooldown");
             return;
         }
 
+        int seconds = module.getItemCooldownManager().getCooldownSeconds(material);
         module.getItemCooldownManager().applyCooldown(id, material);
+        player.setCooldown(material, seconds * 20);
     }
-
-    private String formatItemName(Material material) {
-        String[] parts = material.name().toLowerCase().split("_");
-        StringBuilder result = new StringBuilder();
-        for (String part : parts) {
-            if (part.isEmpty()) continue;
-            if (result.length() > 0) result.append(' ');
-            result.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
-        }
-        return result.toString();
-    }
-}
+            }
