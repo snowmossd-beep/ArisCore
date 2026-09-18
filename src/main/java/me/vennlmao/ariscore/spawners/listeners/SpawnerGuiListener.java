@@ -12,6 +12,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
+import java.util.Map;
 
 public class SpawnerGuiListener implements Listener {
 
@@ -50,7 +54,7 @@ public class SpawnerGuiListener implements Listener {
 
         switch (holder.getScreen()) {
             case INFO -> handleInfoClick(player, data, gui, slot);
-            case STORAGE -> handleStorageClick(player, data, holder, gui, slot);
+            case STORAGE -> handleStorageClick(player, data, holder, gui, slot, event.getCurrentItem());
             case CONFIRM -> handleConfirmClick(player, data, holder, gui, slot);
         }
     }
@@ -78,7 +82,7 @@ public class SpawnerGuiListener implements Listener {
         }
     }
 
-    private void handleStorageClick(Player player, SpawnerData data, SpawnerGuiHolder holder, FileConfiguration gui, int slot) {
+    private void handleStorageClick(Player player, SpawnerData data, SpawnerGuiHolder holder, FileConfiguration gui, int slot, ItemStack clicked) {
         if (slot == gui.getInt("storage.back.slot", 45)) {
             openInfo(player, data);
         } else if (slot == gui.getInt("storage.previous-page.slot", 48)) {
@@ -88,21 +92,66 @@ public class SpawnerGuiListener implements Listener {
             SoundUtil.play(player, "page");
             openStorage(player, data, holder.getPage() + 1);
         } else if (slot == gui.getInt("storage.drop-all.slot", 52)) {
-            if (data.totalStoredItems() <= 0) {
-                MessageUtil.sendChat(player, "storage_empty");
-                return;
-            }
-            module.getSpawnerManager().dropAll(player, data);
-            MessageUtil.sendChat(player, "dropped_all");
-            SoundUtil.play(player, "drop");
-            openStorage(player, data, holder.getPage());
+            dropPage(player, data, holder);
         } else if (slot == gui.getInt("storage.sell-all.slot", 53)) {
             if (data.totalStoredItems() <= 0) {
                 MessageUtil.sendChat(player, "storage_empty");
                 return;
             }
             openConfirm(player, data, SpawnerGuiHolder.Screen.STORAGE);
+        } else if (slot >= 0 && slot < SpawnerGuiBuilder.STORAGE_PAGE_SIZE) {
+            collectItem(player, data, holder, clicked);
         }
+    }
+
+    private void collectItem(Player player, SpawnerData data, SpawnerGuiHolder holder, ItemStack clicked) {
+        if (clicked == null || clicked.getType().isAir()) return;
+
+        long inStorage = data.getStoredCount(clicked.getType());
+        if (inStorage <= 0) return;
+
+        int take = (int) Math.min(Math.min(inStorage, clicked.getAmount()), 64);
+        Map<Integer, ItemStack> leftover = player.getInventory().addItem(new ItemStack(clicked.getType(), take));
+        int leftoverAmount = leftover.values().stream().mapToInt(ItemStack::getAmount).sum();
+        int given = take - leftoverAmount;
+
+        if (given <= 0) {
+            MessageUtil.sendChat(player, "inventory_full");
+            return;
+        }
+
+        data.removeItem(clicked.getType(), given);
+        MessageUtil.sendChat(player, "collected_items",
+                s -> s.replace("{amount}", String.valueOf(given)).replace("{item}", SpawnerGuiBuilder.niceName(clicked.getType())));
+        SoundUtil.play(player, "collect");
+        openStorage(player, data, holder.getPage());
+    }
+
+    private void dropPage(Player player, SpawnerData data, SpawnerGuiHolder holder) {
+        List<ItemStack> pageItems = SpawnerGuiBuilder.pageItems(data, holder.getPage());
+        if (pageItems.isEmpty()) {
+            MessageUtil.sendChat(player, "storage_empty");
+            return;
+        }
+
+        int count = 0;
+        for (ItemStack stack : pageItems) {
+            long inStorage = data.getStoredCount(stack.getType());
+            int take = (int) Math.min(inStorage, stack.getAmount());
+            if (take <= 0) continue;
+            data.removeItem(stack.getType(), take);
+            player.getWorld().dropItemNaturally(player.getLocation(), new ItemStack(stack.getType(), take));
+            count += take;
+        }
+
+        if (count <= 0) {
+            MessageUtil.sendChat(player, "storage_empty");
+            return;
+        }
+
+        MessageUtil.sendChat(player, "dropped_all");
+        SoundUtil.play(player, "drop");
+        openStorage(player, data, holder.getPage());
     }
 
     private void handleConfirmClick(Player player, SpawnerData data, SpawnerGuiHolder holder, FileConfiguration gui, int slot) {
@@ -132,4 +181,5 @@ public class SpawnerGuiListener implements Listener {
             openInfo(player, data);
         }
     }
-}
+            }
+                                 
