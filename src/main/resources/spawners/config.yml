@@ -43,6 +43,8 @@ messages:
   no_xp: "&cKhông có XP để thu."
   collected_xp: "&aĐã thu {amount} kinh nghiệm."
   sell_cancelled: "&cĐã hủy bán."
+  collected_items: "&aĐã lấy {amount}x {item}."
+  inventory_full: "&cTúi đồ của bạn đã đầy."
 
 sounds:
   place:
@@ -77,3 +79,8 @@ sounds:
     sound: UI_BUTTON_CLICK
     volume: 1.0
     pitch: 1.0
+  collect:
+    sound: ENTITY_ITEM_PICKUP
+    volume: 1.0
+    pitch: 1.2
+    
