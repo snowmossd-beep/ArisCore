@@ -5,6 +5,7 @@ import me.vennlmao.ariscore.combat.utils.MessageUtil;
 import me.vennlmao.ariscore.combat.utils.SoundUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -82,9 +83,13 @@ public class CombatManager {
     public void untag(UUID id) {
         combatEndsAt.remove(id);
         opponentName.remove(id);
+        module.getItemCooldownManager().clearPlayer(id);
         Player player = Bukkit.getPlayer(id);
-        if (player != null && player.isOnline() && isGlowingEnabled()) {
-            player.setGlowing(false);
+        if (player != null && player.isOnline()) {
+            if (isGlowingEnabled()) player.setGlowing(false);
+            for (Material material : module.getItemCooldownManager().getTrackedItems().keySet()) {
+                player.setCooldown(material, 0);
+            }
         }
     }
 
@@ -146,4 +151,4 @@ public class CombatManager {
         combatEndsAt.clear();
         opponentName.clear();
     }
-}
+    }
