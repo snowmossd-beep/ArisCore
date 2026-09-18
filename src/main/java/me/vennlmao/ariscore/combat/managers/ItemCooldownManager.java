@@ -76,7 +76,11 @@ public class ItemCooldownManager {
                 .put(material, System.currentTimeMillis() + (seconds * 1000L));
     }
 
+    public void clearPlayer(UUID id) {
+        cooldownEndsAt.remove(id);
+    }
+
     public void clear() {
         cooldownEndsAt.clear();
     }
-}
+                                           }
