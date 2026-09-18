@@ -111,7 +111,7 @@ gui:
           - "&f{current}&7/&f{max}"
       ping:
         slot: 14
-        material: PLAYER_HEAD
+        material: "PLAYER_HEAD_SELF"
         display-name: "&dPing của bạn"
         lore:
           - "&7Ping hiện tại: &f{ping}ms"
