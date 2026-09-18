@@ -46,6 +46,8 @@ public class ItemCooldownListener implements Listener {
 
         int seconds = module.getItemCooldownManager().getCooldownSeconds(material);
         module.getItemCooldownManager().applyCooldown(id, material);
-        player.setCooldown(material, seconds * 20);
+
+        player.getScheduler().runDelayed(module.getPlugin(),
+                task -> player.setCooldown(material, seconds * 20), null, 1L);
     }
             }
