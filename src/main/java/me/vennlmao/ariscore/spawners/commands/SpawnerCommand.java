@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SpawnerCommand implements CommandExecutor, TabCompleter {
@@ -74,8 +75,20 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
             } catch (NumberFormatException ignored) {}
         }
 
-        ItemStack item = SpawnerItemUtil.createItem(type, amount);
-        target.getInventory().addItem(item);
+        long remaining = amount;
+        while (remaining > 0) {
+            int give = (int) Math.min(remaining, 64);
+            ItemStack stack = SpawnerItemUtil.createItem(type, 1);
+            stack.setAmount(give);
+
+            Map<Integer, ItemStack> leftover = target.getInventory().addItem(stack);
+            for (ItemStack drop : leftover.values()) {
+                target.getWorld().dropItemNaturally(target.getLocation(), drop);
+            }
+
+            remaining -= give;
+        }
+
         sender.sendMessage(ColorUtil.parse("&aĐã cho " + target.getName() + " " + amount + "x " + SpawnerItemUtil.mobName(type) + " Spawner."));
     }
 
@@ -119,4 +132,4 @@ public class SpawnerCommand implements CommandExecutor, TabCompleter {
     private List<String> filter(List<String> options, String input) {
         return options.stream().filter(s -> s.toLowerCase().startsWith(input.toLowerCase())).collect(Collectors.toList());
     }
-}
+                             }
