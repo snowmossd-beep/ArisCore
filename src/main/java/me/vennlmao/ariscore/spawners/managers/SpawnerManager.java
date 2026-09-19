@@ -25,6 +25,7 @@ public class SpawnerManager {
     public void loadAll() {
         cache.clear();
         for (SpawnerData data : db.loadAll()) {
+            resetProductionTimer(data);
             cache.put(data.key(), data);
         }
         module.getPlugin().getLogger().info("[Spawners] Loaded " + cache.size() + " spawners.");
@@ -60,9 +61,16 @@ public class SpawnerManager {
     public SpawnerData register(Location loc, EntityType type, long amount, Player owner) {
         SpawnerData data = new SpawnerData(loc.getWorld().getName(), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
                 type, amount, owner != null ? owner.getUniqueId() : null);
+        resetProductionTimer(data);
         cache.put(data.key(), data);
         db.save(data);
         return data;
+    }
+
+    private void resetProductionTimer(SpawnerData data) {
+        MobSpawnerDefinition def = module.getSpawnerDefinitionManager().get(data.getEntityType());
+        int intervalTicks = def != null ? Math.max(20, def.getTimeSeconds() * 20) : 1200;
+        data.setTicksUntilProduction(intervalTicks);
     }
 
     public void unregister(SpawnerData data) {
@@ -75,10 +83,6 @@ public class SpawnerManager {
         return data.getAmount() + addAmount > max;
     }
 
-    /**
-     * Isolation bonus multiplier: spawners placed far from other spawners produce faster.
-     * Every neighbor within the configured radius reduces the multiplier.
-     */
     public double getIsolationMultiplier(SpawnerData data) {
         if (!module.getConfig().getBoolean("isolation.enabled", true)) return 1.0;
 
@@ -123,7 +127,6 @@ public class SpawnerManager {
         return total;
     }
 
-    /** Sells the entire storage of a spawner through the Sell module's economy. Returns total earned. */
     public double sellAll(Player player, SpawnerData data) {
         double total = 0;
         Map<Material, Long> snapshot = new HashMap<>(data.getStorage());
@@ -144,7 +147,6 @@ public class SpawnerManager {
         return total;
     }
 
-    /** Drops the entire storage of a spawner on the ground at the player's location. */
     public void dropAll(Player player, SpawnerData data) {
         Map<Material, Long> snapshot = new HashMap<>(data.getStorage());
         for (Map.Entry<Material, Long> entry : snapshot.entrySet()) {
@@ -182,4 +184,4 @@ public class SpawnerManager {
         db.save(data);
         data.clearDirty();
     }
-}
+    }
