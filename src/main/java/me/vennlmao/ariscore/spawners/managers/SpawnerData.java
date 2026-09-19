@@ -7,22 +7,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * In-memory representation of a single placed (virtual) spawner block.
- * All production math and storage happens here; the physical block is only
- * used for placement/break/interact detection, never for real mob spawning.
- */
 public class SpawnerData {
 
     private final String world;
     private final int x, y, z;
     private EntityType entityType;
-    private long amount;          // how many spawners are stacked on this block
-    private UUID owner;           // who placed it (informational only)
+    private long amount;
+    private UUID owner;
     private long storedXp;
     private final Map<Material, Long> storage = new HashMap<>();
     private int ticksUntilProduction;
-    private boolean dirty;        // needs saving to DB
+    private boolean dirty;
 
     public SpawnerData(String world, int x, int y, int z, EntityType entityType, long amount, UUID owner) {
         this.world = world;
@@ -96,7 +91,6 @@ public class SpawnerData {
     public void markDirty() { this.dirty = true; }
     public void clearDirty() { this.dirty = false; }
 
-    /** Serializes storage map to a compact "MAT:qty;MAT:qty" string for DB storage. */
     public String serializeStorage() {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<Material, Long> e : storage.entrySet()) {
@@ -119,4 +113,4 @@ public class SpawnerData {
             } catch (IllegalArgumentException ignored) {}
         }
     }
-}
+    }
