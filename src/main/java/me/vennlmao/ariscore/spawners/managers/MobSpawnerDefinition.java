@@ -40,9 +40,7 @@ public class MobSpawnerDefinition {
     public EntityType getEntityType() { return entityType; }
     public String getSpawnerName() { return spawnerName; }
     public String getTitle() { return title; }
-    /** Icon dùng cho GUI (vd. slot "fullness"). Thường là TEXTURE:... (đầu skin). */
     public String getMaterial() { return material; }
-    /** Icon dùng cho item khi /spawner give. Mặc định là "SPAWNER" nếu không cấu hình riêng, tách biệt khỏi icon GUI. */
     public String getGiveMaterial() { return giveMaterial; }
     public int getTimeSeconds() { return timeSeconds; }
     public String getDisplayName() { return displayName; }
