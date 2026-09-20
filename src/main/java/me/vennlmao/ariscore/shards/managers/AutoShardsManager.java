@@ -112,7 +112,8 @@ public class AutoShardsManager {
 
     private boolean isAllowed(Player player, String section) {
         List<String> allowWorlds = module.getConfig().getStringList(section + ".allow_worlds");
-        if (!allowWorlds.isEmpty() && !allowWorlds.contains(player.getWorld().getName())) return false;
+        if (allowWorlds.isEmpty()) return false;
+        if (!allowWorlds.contains(player.getWorld().getName())) return false;
 
         List<String> allowRegions = module.getConfig().getStringList(section + ".allow_regions");
         if (allowRegions.isEmpty()) return true;
@@ -130,4 +131,4 @@ public class AutoShardsManager {
 
         return false;
     }
-    }
+                             }
