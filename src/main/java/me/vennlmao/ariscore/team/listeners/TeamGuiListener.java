@@ -2,30 +2,26 @@ package me.vennlmao.ariscore.team.listeners;
 
 import me.vennlmao.ariscore.team.TeamModule;
 import me.vennlmao.ariscore.team.gui.TeamGuiBuilder;
+import me.vennlmao.ariscore.team.gui.TeamMenuHolder;
 import me.vennlmao.ariscore.team.managers.TeamData;
 import me.vennlmao.ariscore.team.managers.TeamRole;
-import me.vennlmao.ariscore.team.utils.ColorUtil;
 import me.vennlmao.ariscore.team.utils.MessageUtil;
 import me.vennlmao.ariscore.team.utils.SoundUtil;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class TeamGuiListener implements Listener {
 
     private final TeamModule module;
-    private final Map<UUID, Integer> playerPage = new HashMap<>();
-    private final Map<UUID, UUID> pendingTarget = new HashMap<>();
 
     public TeamGuiListener(TeamModule module) { this.module = module; }
 
@@ -33,58 +29,38 @@ public class TeamGuiListener implements Listener {
         TeamData team = module.getTeamManager().getPlayerTeam(player.getUniqueId());
         if (team == null) return;
         int p = Math.max(0, page);
-        playerPage.put(player.getUniqueId(), p);
         player.getScheduler().run(module.getPlugin(), t ->
                 player.openInventory(module.getGuiBuilder().buildMain(player, team, p)), null);
     }
 
-    private void openMemberActions(Player player, TeamData team, UUID target) {
-        pendingTarget.put(player.getUniqueId(), target);
-        player.getScheduler().run(module.getPlugin(), t ->
-                player.openInventory(module.getGuiBuilder().buildMemberActions(team, target)), null);
+    @EventHandler
+    public void onDrag(InventoryDragEvent event) {
+        if (event.getInventory().getHolder() instanceof TeamMenuHolder) {
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
+        if (!(event.getView().getTopInventory().getHolder() instanceof TeamMenuHolder holder)) return;
         if (!(event.getWhoClicked() instanceof Player player)) return;
-        if (event.getCurrentItem() == null) return;
 
-        String title = PlainTextComponentSerializer.plainText().serialize(event.getView().title());
+        event.setCancelled(true);
 
-        String mainBase = ColorUtil.strip(module.getConfig().getString("gui.main.title", ""))
-                .replaceAll("\\{[^}]*}", "").trim();
-        String memberActionsTitle = ColorUtil.strip(module.getConfig().getString("gui.member-actions.title", ""))
-                .replaceAll("\\{[^}]*}", "").trim();
-        String kickTitle = ColorUtil.strip(module.getConfig().getString("gui.kick-confirm.title", ""))
-                .replaceAll("\\{[^}]*}", "").trim();
-        String leaveTitle = ColorUtil.strip(module.getConfig().getString("gui.leave-confirm.title", ""));
-        String disbandTitle = ColorUtil.strip(module.getConfig().getString("gui.disband-confirm.title", ""));
-        String transferTitle = ColorUtil.strip(module.getConfig().getString("gui.transfer-confirm.title", ""))
-                .replaceAll("\\{[^}]*}", "").trim();
+        if (event.getClickedInventory() == null || event.getClickedInventory() != event.getView().getTopInventory()) return;
 
-        if (title.contains(mainBase) && !mainBase.isEmpty()) {
-            event.setCancelled(true);
-            handleMain(player, event.getSlot(), event.getCurrentItem());
-        } else if (title.contains(memberActionsTitle) && !memberActionsTitle.isEmpty()) {
-            event.setCancelled(true);
-            handleMemberActions(player, event.getSlot());
-        } else if (title.contains(kickTitle) && !kickTitle.isEmpty()) {
-            event.setCancelled(true);
-            handleKickConfirm(player, event.getSlot());
-        } else if (title.equals(leaveTitle)) {
-            event.setCancelled(true);
-            handleLeaveConfirm(player, event.getSlot());
-        } else if (title.equals(disbandTitle)) {
-            event.setCancelled(true);
-            handleDisbandConfirm(player, event.getSlot());
-        } else if (title.contains(transferTitle) && !transferTitle.isEmpty()) {
-            event.setCancelled(true);
-            handleTransferConfirm(player, event.getSlot());
+        switch (holder.getScreen()) {
+            case MAIN -> handleMain(player, holder, event.getSlot(), event.getCurrentItem());
+            case MEMBER_ACTIONS -> handleMemberActions(player, holder, event.getSlot());
+            case KICK_CONFIRM -> handleKickConfirm(player, holder, event.getSlot());
+            case LEAVE_CONFIRM -> handleLeaveConfirm(player, holder, event.getSlot());
+            case DISBAND_CONFIRM -> handleDisbandConfirm(player, holder, event.getSlot());
+            case TRANSFER_CONFIRM -> handleTransferConfirm(player, holder, event.getSlot());
         }
     }
 
-    private void handleMain(Player player, int slot, ItemStack clicked) {
-        TeamData team = module.getTeamManager().getPlayerTeam(player.getUniqueId());
+    private void handleMain(Player player, TeamMenuHolder holder, int slot, ItemStack clicked) {
+        TeamData team = module.getTeamManager().getTeam(holder.getTeamName());
         if (team == null) { player.closeInventory(); return; }
 
         int prevSlot = module.getConfig().getInt("gui.main.items.previous-page.slot", -1);
@@ -97,7 +73,7 @@ public class TeamGuiListener implements Listener {
         int disbandSlot = module.getConfig().getInt("gui.main.items.disband.slot", -1);
         int leaveSlot = module.getConfig().getInt("gui.main.items.leave.slot", -1);
 
-        int page = playerPage.getOrDefault(player.getUniqueId(), 0);
+        int page = holder.getPage();
 
         if (slot == prevSlot) {
             SoundUtil.play(player, "page");
@@ -149,15 +125,19 @@ public class TeamGuiListener implements Listener {
             return;
         }
         if (slot == disbandSlot && team.isLeader(player.getUniqueId())) {
-            player.getScheduler().run(module.getPlugin(), t -> player.openInventory(module.getGuiBuilder().buildDisbandConfirm()), null);
+            SoundUtil.play(player, "click");
+            player.getScheduler().run(module.getPlugin(), t ->
+                    player.openInventory(module.getGuiBuilder().buildDisbandConfirm(team, page)), null);
             return;
         }
         if (slot == leaveSlot && !team.isLeader(player.getUniqueId())) {
-            player.getScheduler().run(module.getPlugin(), t -> player.openInventory(module.getGuiBuilder().buildLeaveConfirm()), null);
+            SoundUtil.play(player, "click");
+            player.getScheduler().run(module.getPlugin(), t ->
+                    player.openInventory(module.getGuiBuilder().buildLeaveConfirm(team, page)), null);
             return;
         }
 
-        if (slot >= 0 && slot < TeamGuiBuilder.PAGE_SIZE && clicked.getItemMeta() instanceof SkullMeta skullMeta) {
+        if (slot >= 0 && slot < TeamGuiBuilder.PAGE_SIZE && clicked != null && clicked.getItemMeta() instanceof SkullMeta skullMeta) {
             OfflinePlayer op = skullMeta.getOwningPlayer();
             if (op == null) return;
             UUID targetUuid = op.getUniqueId();
@@ -167,7 +147,9 @@ public class TeamGuiListener implements Listener {
                     MessageUtil.sendChat(player, "leader_must_transfer");
                     SoundUtil.play(player, "error");
                 } else {
-                    player.getScheduler().run(module.getPlugin(), t -> player.openInventory(module.getGuiBuilder().buildLeaveConfirm()), null);
+                    SoundUtil.play(player, "click");
+                    player.getScheduler().run(module.getPlugin(), t ->
+                            player.openInventory(module.getGuiBuilder().buildLeaveConfirm(team, page)), null);
                 }
                 return;
             }
@@ -181,15 +163,16 @@ public class TeamGuiListener implements Listener {
             }
 
             SoundUtil.play(player, "click");
-            openMemberActions(player, team, targetUuid);
+            player.getScheduler().run(module.getPlugin(), t ->
+                    player.openInventory(module.getGuiBuilder().buildMemberActions(team, page, targetUuid)), null);
         }
     }
 
-    private void handleMemberActions(Player player, int slot) {
-        TeamData team = module.getTeamManager().getPlayerTeam(player.getUniqueId());
+    private void handleMemberActions(Player player, TeamMenuHolder holder, int slot) {
+        TeamData team = module.getTeamManager().getTeam(holder.getTeamName());
         if (team == null) { player.closeInventory(); return; }
 
-        UUID target = pendingTarget.get(player.getUniqueId());
+        UUID target = holder.getTarget();
         if (target == null) { player.closeInventory(); return; }
 
         int backSlot = module.getConfig().getInt("gui.member-actions.back.slot", -1);
@@ -200,7 +183,7 @@ public class TeamGuiListener implements Listener {
 
         if (slot == backSlot) {
             SoundUtil.play(player, "click");
-            openMain(player, playerPage.getOrDefault(player.getUniqueId(), 0));
+            openMain(player, holder.getPage());
             return;
         }
 
@@ -212,7 +195,8 @@ public class TeamGuiListener implements Listener {
             module.getTeamManager().setRole(team, target, TeamRole.ADMIN);
             MessageUtil.sendChat(player, "promote", s -> s.replace("{player}", offlineName(target)));
             SoundUtil.play(player, "success");
-            openMemberActions(player, team, target);
+            player.getScheduler().run(module.getPlugin(), t ->
+                    player.openInventory(module.getGuiBuilder().buildMemberActions(team, holder.getPage(), target)), null);
             return;
         }
         if (slot == demoteSlot) {
@@ -220,33 +204,36 @@ public class TeamGuiListener implements Listener {
             module.getTeamManager().setRole(team, target, TeamRole.MEMBER);
             MessageUtil.sendChat(player, "demote", s -> s.replace("{player}", offlineName(target)));
             SoundUtil.play(player, "click");
-            openMemberActions(player, team, target);
+            player.getScheduler().run(module.getPlugin(), t ->
+                    player.openInventory(module.getGuiBuilder().buildMemberActions(team, holder.getPage(), target)), null);
             return;
         }
         if (slot == transferSlot) {
             if (!isLeader) { SoundUtil.play(player, "error"); return; }
+            SoundUtil.play(player, "click");
             player.getScheduler().run(module.getPlugin(), t ->
-                    player.openInventory(module.getGuiBuilder().buildTransferConfirm(Bukkit.getOfflinePlayer(target))), null);
+                    player.openInventory(module.getGuiBuilder().buildTransferConfirm(team, holder.getPage(), target)), null);
             return;
         }
         if (slot == kickSlot) {
             TeamRole viewerRole = team.getRole(player.getUniqueId());
             boolean canKick = isLeader || (viewerRole != null && viewerRole.has(module, "can-kick"));
             if (!canKick || targetRole == TeamRole.LEADER) { SoundUtil.play(player, "error"); return; }
+            SoundUtil.play(player, "click");
             player.getScheduler().run(module.getPlugin(), t ->
-                    player.openInventory(module.getGuiBuilder().buildKickConfirm(Bukkit.getOfflinePlayer(target))), null);
+                    player.openInventory(module.getGuiBuilder().buildKickConfirm(team, holder.getPage(), target)), null);
         }
     }
 
-    private void handleKickConfirm(Player player, int slot) {
-        TeamData team = module.getTeamManager().getPlayerTeam(player.getUniqueId());
+    private void handleKickConfirm(Player player, TeamMenuHolder holder, int slot) {
+        TeamData team = module.getTeamManager().getTeam(holder.getTeamName());
         if (team == null) { player.closeInventory(); return; }
 
         int confirmSlot = module.getConfig().getInt("gui.kick-confirm.confirm.slot", -1);
         int cancelSlot = module.getConfig().getInt("gui.kick-confirm.cancel.slot", -1);
+        UUID target = holder.getTarget();
 
         if (slot == confirmSlot) {
-            UUID target = pendingTarget.remove(player.getUniqueId());
             if (target == null) return;
             String name = offlineName(target);
             module.getTeamManager().removeMember(target);
@@ -260,17 +247,17 @@ public class TeamGuiListener implements Listener {
             }
         } else if (slot == cancelSlot) {
             SoundUtil.play(player, "click");
-            UUID target = pendingTarget.get(player.getUniqueId());
             if (target != null) {
-                openMemberActions(player, team, target);
+                player.getScheduler().run(module.getPlugin(), t ->
+                        player.openInventory(module.getGuiBuilder().buildMemberActions(team, holder.getPage(), target)), null);
             } else {
-                openMain(player, playerPage.getOrDefault(player.getUniqueId(), 0));
+                openMain(player, holder.getPage());
             }
         }
     }
 
-    private void handleLeaveConfirm(Player player, int slot) {
-        TeamData team = module.getTeamManager().getPlayerTeam(player.getUniqueId());
+    private void handleLeaveConfirm(Player player, TeamMenuHolder holder, int slot) {
+        TeamData team = module.getTeamManager().getTeam(holder.getTeamName());
         if (team == null) { player.closeInventory(); return; }
 
         int confirmSlot = module.getConfig().getInt("gui.leave-confirm.confirm.slot", -1);
@@ -289,12 +276,12 @@ public class TeamGuiListener implements Listener {
             }
         } else if (slot == cancelSlot) {
             SoundUtil.play(player, "click");
-            openMain(player, playerPage.getOrDefault(player.getUniqueId(), 0));
+            openMain(player, holder.getPage());
         }
     }
 
-    private void handleDisbandConfirm(Player player, int slot) {
-        TeamData team = module.getTeamManager().getPlayerTeam(player.getUniqueId());
+    private void handleDisbandConfirm(Player player, TeamMenuHolder holder, int slot) {
+        TeamData team = module.getTeamManager().getTeam(holder.getTeamName());
 
         int confirmSlot = module.getConfig().getInt("gui.disband-confirm.confirm.slot", -1);
         int cancelSlot = module.getConfig().getInt("gui.disband-confirm.cancel.slot", -1);
@@ -307,27 +294,25 @@ public class TeamGuiListener implements Listener {
                 if (m != null && !m.equals(player)) MessageUtil.sendChat(m, "disband_notify", s -> s.replace("{team}", teamName));
             }
             module.getTeamManager().disbandTeam(teamName);
-            pendingTarget.remove(player.getUniqueId());
-            playerPage.remove(player.getUniqueId());
             player.closeInventory();
             MessageUtil.sendChat(player, "disband", s -> s.replace("{team}", teamName));
             SoundUtil.play(player, "error");
         } else if (slot == cancelSlot) {
             SoundUtil.play(player, "click");
             if (team == null || !team.isLeader(player.getUniqueId())) { player.closeInventory(); return; }
-            openMain(player, playerPage.getOrDefault(player.getUniqueId(), 0));
+            openMain(player, holder.getPage());
         }
     }
 
-    private void handleTransferConfirm(Player player, int slot) {
-        TeamData team = module.getTeamManager().getPlayerTeam(player.getUniqueId());
+    private void handleTransferConfirm(Player player, TeamMenuHolder holder, int slot) {
+        TeamData team = module.getTeamManager().getTeam(holder.getTeamName());
         if (team == null) { player.closeInventory(); return; }
 
         int confirmSlot = module.getConfig().getInt("gui.transfer-confirm.confirm.slot", -1);
         int cancelSlot = module.getConfig().getInt("gui.transfer-confirm.cancel.slot", -1);
+        UUID target = holder.getTarget();
 
         if (slot == confirmSlot) {
-            UUID target = pendingTarget.remove(player.getUniqueId());
             if (target == null || !team.isLeader(player.getUniqueId())) { player.closeInventory(); return; }
             module.getTeamManager().transferLeadership(team, target);
             player.closeInventory();
@@ -340,11 +325,11 @@ public class TeamGuiListener implements Listener {
             }
         } else if (slot == cancelSlot) {
             SoundUtil.play(player, "click");
-            UUID target = pendingTarget.get(player.getUniqueId());
             if (target != null) {
-                openMemberActions(player, team, target);
+                player.getScheduler().run(module.getPlugin(), t ->
+                        player.openInventory(module.getGuiBuilder().buildMemberActions(team, holder.getPage(), target)), null);
             } else {
-                openMain(player, playerPage.getOrDefault(player.getUniqueId(), 0));
+                openMain(player, holder.getPage());
             }
         }
     }
@@ -353,5 +338,5 @@ public class TeamGuiListener implements Listener {
         OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
         return op.getName() != null ? op.getName() : "?";
     }
-                               }
-            
+            }
+                                                     
