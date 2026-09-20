@@ -8,8 +8,14 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 import java.io.File;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class TeamDatabaseManager implements AutoCloseable {
 
@@ -49,6 +55,9 @@ public class TeamDatabaseManager implements AutoCloseable {
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute("CREATE TABLE IF NOT EXISTS " + p() + "teams (" +
                     "name VARCHAR(64) PRIMARY KEY," +
+                    "tag VARCHAR(16)," +
+                    "leader VARCHAR(36)," +
+                    "created_at BIGINT DEFAULT 0," +
                     "home_world VARCHAR(64)," +
                     "home_x DOUBLE DEFAULT 0," +
                     "home_y DOUBLE DEFAULT 0," +
@@ -61,14 +70,11 @@ public class TeamDatabaseManager implements AutoCloseable {
                     "uuid VARCHAR(36) PRIMARY KEY," +
                     "team_name VARCHAR(64) NOT NULL," +
                     "role VARCHAR(16) NOT NULL," +
-                    "join_date BIGINT DEFAULT 0," +
-                    "perm_edit_home TINYINT DEFAULT 0," +
-                    "perm_kick TINYINT DEFAULT 0," +
-                    "perm_manage_teammates TINYINT DEFAULT 0," +
-                    "perm_pvp_toggle TINYINT DEFAULT 0," +
-                    "perm_visit_home TINYINT DEFAULT 1," +
-                    "perm_team_chat TINYINT DEFAULT 1," +
-                    "perm_invite TINYINT DEFAULT 0" +
+                    "join_date BIGINT DEFAULT 0" +
+                    ")");
+            stmt.execute("CREATE TABLE IF NOT EXISTS " + p() + "team_endchest (" +
+                    "team_name VARCHAR(64) PRIMARY KEY," +
+                    "contents TEXT" +
                     ")");
         } catch (SQLException e) {
             module.getPlugin().getLogger().severe("[Team] Tables error: " + e.getMessage());
@@ -82,7 +88,11 @@ public class TeamDatabaseManager implements AutoCloseable {
             while (rs.next()) {
                 String name = rs.getString("name");
                 TeamData team = new TeamData(name);
+                team.setTag(rs.getString("tag"));
+                team.setCreatedAt(rs.getLong("created_at"));
                 team.setPvpEnabled(rs.getInt("pvp_enabled") == 1);
+                String leaderStr = rs.getString("leader");
+                if (leaderStr != null) team.setLeader(UUID.fromString(leaderStr));
                 String world = rs.getString("home_world");
                 if (world != null) {
                     World w = Bukkit.getWorld(world);
@@ -95,18 +105,8 @@ public class TeamDatabaseManager implements AutoCloseable {
             while (mrs.next()) {
                 TeamData team = teams.get(mrs.getString("team_name").toLowerCase());
                 if (team == null) continue;
-                TeamData.MemberData md = new TeamData.MemberData(
-                        UUID.fromString(mrs.getString("uuid")),
-                        TeamData.Role.valueOf(mrs.getString("role")),
-                        mrs.getLong("join_date"));
-                md.permEditHome = mrs.getInt("perm_edit_home") == 1;
-                md.permKick = mrs.getInt("perm_kick") == 1;
-                md.permManageTeammates = mrs.getInt("perm_manage_teammates") == 1;
-                md.permPvpToggle = mrs.getInt("perm_pvp_toggle") == 1;
-                md.permVisitHome = mrs.getInt("perm_visit_home") == 1;
-                md.permTeamChat = mrs.getInt("perm_team_chat") == 1;
-                md.permInvite = mrs.getInt("perm_invite") == 1;
-                team.addMember(md);
+                team.addMember(UUID.fromString(mrs.getString("uuid")),
+                        TeamRole.valueOf(mrs.getString("role")), mrs.getLong("join_date"));
             }
         } catch (SQLException e) {
             module.getPlugin().getLogger().severe("[Team] Load error: " + e.getMessage());
@@ -116,20 +116,24 @@ public class TeamDatabaseManager implements AutoCloseable {
 
     public void saveTeam(TeamData team) {
         String sql = mysql
-                ? "INSERT INTO " + p() + "teams (name,home_world,home_x,home_y,home_z,home_yaw,home_pitch,pvp_enabled) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE home_world=?,home_x=?,home_y=?,home_z=?,home_yaw=?,home_pitch=?,pvp_enabled=?"
-                : "INSERT OR REPLACE INTO " + p() + "teams (name,home_world,home_x,home_y,home_z,home_yaw,home_pitch,pvp_enabled) VALUES (?,?,?,?,?,?,?,?)";
+                ? "INSERT INTO " + p() + "teams (name,tag,leader,created_at,home_world,home_x,home_y,home_z,home_yaw,home_pitch,pvp_enabled) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE tag=?,leader=?,created_at=?,home_world=?,home_x=?,home_y=?,home_z=?,home_yaw=?,home_pitch=?,pvp_enabled=?"
+                : "INSERT OR REPLACE INTO " + p() + "teams (name,tag,leader,created_at,home_world,home_x,home_y,home_z,home_yaw,home_pitch,pvp_enabled) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             Location h = team.getHome();
             String w = h != null && h.getWorld() != null ? h.getWorld().getName() : null;
             double x = h != null ? h.getX() : 0, y = h != null ? h.getY() : 0, z = h != null ? h.getZ() : 0;
             float yaw = h != null ? h.getYaw() : 0, pitch = h != null ? h.getPitch() : 0;
             int pvp = team.isPvpEnabled() ? 1 : 0;
-            ps.setString(1, team.getName()); ps.setString(2, w);
-            ps.setDouble(3, x); ps.setDouble(4, y); ps.setDouble(5, z);
-            ps.setFloat(6, yaw); ps.setFloat(7, pitch); ps.setInt(8, pvp);
+            String leader = team.getLeader() != null ? team.getLeader().toString() : null;
+
+            ps.setString(1, team.getName()); ps.setString(2, team.getTag()); ps.setString(3, leader);
+            ps.setLong(4, team.getCreatedAt()); ps.setString(5, w);
+            ps.setDouble(6, x); ps.setDouble(7, y); ps.setDouble(8, z);
+            ps.setFloat(9, yaw); ps.setFloat(10, pitch); ps.setInt(11, pvp);
             if (mysql) {
-                ps.setString(9, w); ps.setDouble(10, x); ps.setDouble(11, y); ps.setDouble(12, z);
-                ps.setFloat(13, yaw); ps.setFloat(14, pitch); ps.setInt(15, pvp);
+                ps.setString(12, team.getTag()); ps.setString(13, leader); ps.setLong(14, team.getCreatedAt());
+                ps.setString(15, w); ps.setDouble(16, x); ps.setDouble(17, y); ps.setDouble(18, z);
+                ps.setFloat(19, yaw); ps.setFloat(20, pitch); ps.setInt(21, pvp);
             }
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -148,24 +152,14 @@ public class TeamDatabaseManager implements AutoCloseable {
         }
     }
 
-    public void saveMember(TeamData.MemberData md, String teamName) {
+    public void saveMember(UUID uuid, String teamName, TeamRole role, long joinDate) {
         String sql = mysql
-                ? "INSERT INTO " + p() + "team_members (uuid,team_name,role,join_date,perm_edit_home,perm_kick,perm_manage_teammates,perm_pvp_toggle,perm_visit_home,perm_team_chat,perm_invite) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE team_name=?,role=?,join_date=?,perm_edit_home=?,perm_kick=?,perm_manage_teammates=?,perm_pvp_toggle=?,perm_visit_home=?,perm_team_chat=?,perm_invite=?"
-                : "INSERT OR REPLACE INTO " + p() + "team_members (uuid,team_name,role,join_date,perm_edit_home,perm_kick,perm_manage_teammates,perm_pvp_toggle,perm_visit_home,perm_team_chat,perm_invite) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                ? "INSERT INTO " + p() + "team_members (uuid,team_name,role,join_date) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE team_name=?,role=?,join_date=?"
+                : "INSERT OR REPLACE INTO " + p() + "team_members (uuid,team_name,role,join_date) VALUES (?,?,?,?)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, md.uuid.toString()); ps.setString(2, teamName); ps.setString(3, md.role.name());
-            ps.setLong(4, md.joinDate);
-            ps.setInt(5, md.permEditHome ? 1 : 0); ps.setInt(6, md.permKick ? 1 : 0);
-            ps.setInt(7, md.permManageTeammates ? 1 : 0); ps.setInt(8, md.permPvpToggle ? 1 : 0);
-            ps.setInt(9, md.permVisitHome ? 1 : 0); ps.setInt(10, md.permTeamChat ? 1 : 0);
-            ps.setInt(11, md.permInvite ? 1 : 0);
+            ps.setString(1, uuid.toString()); ps.setString(2, teamName); ps.setString(3, role.name()); ps.setLong(4, joinDate);
             if (mysql) {
-                ps.setString(12, teamName); ps.setString(13, md.role.name());
-                ps.setLong(14, md.joinDate);
-                ps.setInt(15, md.permEditHome ? 1 : 0); ps.setInt(16, md.permKick ? 1 : 0);
-                ps.setInt(17, md.permManageTeammates ? 1 : 0); ps.setInt(18, md.permPvpToggle ? 1 : 0);
-                ps.setInt(19, md.permVisitHome ? 1 : 0); ps.setInt(20, md.permTeamChat ? 1 : 0);
-                ps.setInt(21, md.permInvite ? 1 : 0);
+                ps.setString(5, teamName); ps.setString(6, role.name()); ps.setLong(7, joinDate);
             }
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -182,5 +176,40 @@ public class TeamDatabaseManager implements AutoCloseable {
         }
     }
 
+    public String loadEndchest(String teamName) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT contents FROM " + p() + "team_endchest WHERE team_name=?")) {
+            ps.setString(1, teamName);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getString("contents");
+        } catch (SQLException e) {
+            module.getPlugin().getLogger().severe("[Team] Load endchest error: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public void saveEndchest(String teamName, String base64) {
+        String sql = mysql
+                ? "INSERT INTO " + p() + "team_endchest (team_name,contents) VALUES (?,?) ON DUPLICATE KEY UPDATE contents=?"
+                : "INSERT OR REPLACE INTO " + p() + "team_endchest (team_name,contents) VALUES (?,?)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, teamName); ps.setString(2, base64);
+            if (mysql) ps.setString(3, base64);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            module.getPlugin().getLogger().severe("[Team] Save endchest error: " + e.getMessage());
+        }
+    }
+
+    public void deleteEndchest(String teamName) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement("DELETE FROM " + p() + "team_endchest WHERE team_name=?")) {
+            ps.setString(1, teamName); ps.executeUpdate();
+        } catch (SQLException e) {
+            module.getPlugin().getLogger().severe("[Team] Delete endchest error: " + e.getMessage());
+        }
+    }
+
     public void close() { if (dataSource != null && !dataSource.isClosed()) dataSource.close(); }
-}
+                                                }
+                    
