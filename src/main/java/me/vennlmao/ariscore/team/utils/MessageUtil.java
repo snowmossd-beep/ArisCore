@@ -18,7 +18,10 @@ public class MessageUtil {
 
     public static void sendChat(CommandSender sender, String key, UnaryOperator<String> replacer) {
         String msg = module.getConfig().getString("messages." + key, "");
-        if (!msg.isEmpty()) sender.sendMessage(ColorUtil.parse(replacer.apply(msg)));
+        if (msg.isEmpty()) return;
+        String applied = replacer.apply(msg);
+        sender.sendMessage(ColorUtil.parse(applied));
+        if (sender instanceof Player player) player.sendActionBar(ColorUtil.parse(applied));
     }
 
     public static void sendActionbar(Player player, String key) {
