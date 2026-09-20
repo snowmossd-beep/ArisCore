@@ -20,7 +20,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class SpawnerBlockListener implements Listener {
 
@@ -72,26 +71,35 @@ public class SpawnerBlockListener implements Listener {
 
         if (SpawnerItemUtil.isSpawnerItem(hand) && SpawnerItemUtil.getEntityType(hand) == data.getEntityType()) {
             event.setCancelled(true);
-            long handAmount = SpawnerItemUtil.getStackAmount(hand);
-            long addAmount = player.isSneaking() ? handAmount : 1;
 
-            if (module.getSpawnerManager().isMaxStack(data, addAmount)) {
+            long perItemStack = Math.max(1, SpawnerItemUtil.getStackAmount(hand));
+            int physicalAvailable = hand.getAmount();
+            int itemsToConsume = player.isSneaking() ? physicalAvailable : 1;
+
+            long maxStack = module.getConfig().getLong("max-stack-amount", 5000);
+            long totalAdded = 0;
+            int actuallyConsumed = 0;
+
+            for (int i = 0; i < itemsToConsume; i++) {
+                long room = maxStack - (data.getAmount() + totalAdded);
+                if (room < perItemStack) break;
+                totalAdded += perItemStack;
+                actuallyConsumed++;
+            }
+
+            if (totalAdded <= 0) {
                 MessageUtil.sendChat(player, "max_stack_reached");
                 return;
             }
 
-            data.addAmount(addAmount);
+            data.addAmount(totalAdded);
             module.getSpawnerManager().saveNow(data);
 
-            long remaining = handAmount - addAmount;
-            if (remaining <= 0) {
+            int remainingPhysical = physicalAvailable - actuallyConsumed;
+            if (remainingPhysical <= 0) {
                 player.getInventory().setItemInMainHand(null);
             } else {
-                ItemMeta meta = hand.getItemMeta();
-                meta.getPersistentDataContainer().set(
-                        new org.bukkit.NamespacedKey(module.getPlugin(), "spawner_stack_amount"),
-                        org.bukkit.persistence.PersistentDataType.LONG, remaining);
-                hand.setItemMeta(meta);
+                hand.setAmount(remainingPhysical);
             }
 
             MessageUtil.sendActionbar(player, "stacked",
