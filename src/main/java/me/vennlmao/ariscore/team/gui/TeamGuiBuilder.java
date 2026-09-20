@@ -34,7 +34,10 @@ public class TeamGuiBuilder {
                 .replace("{team-name}", team.getName())
                 .replace("{page}", String.valueOf(page + 1));
         int size = module.getConfig().getInt("gui.main.size", 54);
-        Inventory inv = Bukkit.createInventory(null, size, ColorUtil.parse(title));
+
+        TeamMenuHolder holder = new TeamMenuHolder(TeamMenuHolder.Screen.MAIN, team.getName(), page, null);
+        Inventory inv = Bukkit.createInventory(holder, size, ColorUtil.parse(title));
+        holder.setInventory(inv);
 
         applyBorder(inv, "gui.main.border");
 
@@ -146,11 +149,14 @@ public class TeamGuiBuilder {
                 module.getConfig().getStringList(path + ".lore"), s -> s);
     }
 
-    public Inventory buildMemberActions(TeamData team, UUID targetUuid) {
+    public Inventory buildMemberActions(TeamData team, int page, UUID targetUuid) {
         String title = module.getConfig().getString("gui.member-actions.title", "")
                 .replace("{player}", offlineName(targetUuid));
         int size = module.getConfig().getInt("gui.member-actions.size", 27);
-        Inventory inv = Bukkit.createInventory(null, size, ColorUtil.parse(title));
+
+        TeamMenuHolder holder = new TeamMenuHolder(TeamMenuHolder.Screen.MEMBER_ACTIONS, team.getName(), page, targetUuid);
+        Inventory inv = Bukkit.createInventory(holder, size, ColorUtil.parse(title));
+        holder.setInventory(inv);
 
         applyBorder(inv, "gui.member-actions.border");
 
@@ -184,31 +190,34 @@ public class TeamGuiBuilder {
         return inv;
     }
 
-    public Inventory buildKickConfirm(OfflinePlayer target) {
-        return buildConfirmGui("gui.kick-confirm", target.getName());
+    public Inventory buildKickConfirm(TeamData team, int page, UUID target) {
+        return buildConfirmGui(TeamMenuHolder.Screen.KICK_CONFIRM, "gui.kick-confirm", team, page, target);
     }
 
-    public Inventory buildLeaveConfirm() {
-        return buildConfirmGui("gui.leave-confirm", null);
+    public Inventory buildLeaveConfirm(TeamData team, int page) {
+        return buildConfirmGui(TeamMenuHolder.Screen.LEAVE_CONFIRM, "gui.leave-confirm", team, page, null);
     }
 
-    public Inventory buildDisbandConfirm() {
-        return buildConfirmGui("gui.disband-confirm", null);
+    public Inventory buildDisbandConfirm(TeamData team, int page) {
+        return buildConfirmGui(TeamMenuHolder.Screen.DISBAND_CONFIRM, "gui.disband-confirm", team, page, null);
     }
 
-    public Inventory buildTransferConfirm(OfflinePlayer target) {
-        return buildConfirmGui("gui.transfer-confirm", target.getName());
+    public Inventory buildTransferConfirm(TeamData team, int page, UUID target) {
+        return buildConfirmGui(TeamMenuHolder.Screen.TRANSFER_CONFIRM, "gui.transfer-confirm", team, page, target);
     }
 
-    private Inventory buildConfirmGui(String base, String playerName) {
-        String title = module.getConfig().getString(base + ".title", "")
-                .replace("{player}", playerName != null ? playerName : "");
+    private Inventory buildConfirmGui(TeamMenuHolder.Screen screen, String base, TeamData team, int page, UUID target) {
+        String playerName = target != null ? offlineName(target) : "";
+        String title = module.getConfig().getString(base + ".title", "").replace("{player}", playerName);
         int size = module.getConfig().getInt(base + ".size", 27);
-        Inventory inv = Bukkit.createInventory(null, size, ColorUtil.parse(title));
+
+        TeamMenuHolder holder = new TeamMenuHolder(screen, team.getName(), page, target);
+        Inventory inv = Bukkit.createInventory(holder, size, ColorUtil.parse(title));
+        holder.setInventory(inv);
 
         applyBorder(inv, base + ".border");
-        placeControl(inv, base + ".cancel", s -> s.replace("{player}", playerName != null ? playerName : ""));
-        placeControl(inv, base + ".confirm", s -> s.replace("{player}", playerName != null ? playerName : ""));
+        placeControl(inv, base + ".cancel", s -> s.replace("{player}", playerName));
+        placeControl(inv, base + ".confirm", s -> s.replace("{player}", playerName));
 
         return inv;
     }
@@ -249,5 +258,5 @@ public class TeamGuiBuilder {
         item.setItemMeta(meta);
         return item;
     }
-            }
-                         
+                                                   }
+            
