@@ -101,7 +101,7 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
         TeamData team = requireTeam(player);
         if (team == null) return;
         if (!team.isLeader(player.getUniqueId())) { MessageUtil.sendChat(player, "not_leader"); SoundUtil.play(player, "error"); return; }
-        player.getScheduler().run(module.getPlugin(), t -> player.openInventory(module.getGuiBuilder().buildDisbandConfirm()), null);
+        player.getScheduler().run(module.getPlugin(), t -> player.openInventory(module.getGuiBuilder().buildDisbandConfirm(team, 0)), null);
     }
 
     private void handleInvite(Player player, String[] args) {
@@ -160,7 +160,7 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
         TeamData team = requireTeam(player);
         if (team == null) return;
         if (team.isLeader(player.getUniqueId())) { MessageUtil.sendChat(player, "leader_must_transfer"); SoundUtil.play(player, "error"); return; }
-        player.getScheduler().run(module.getPlugin(), t -> player.openInventory(module.getGuiBuilder().buildLeaveConfirm()), null);
+        player.getScheduler().run(module.getPlugin(), t -> player.openInventory(module.getGuiBuilder().buildLeaveConfirm(team, 0)), null);
     }
 
     private void handleKick(Player player, String[] args) {
@@ -343,5 +343,5 @@ public class TeamCommand implements CommandExecutor, TabCompleter {
                     .filter(n -> n.toLowerCase().startsWith(args[1].toLowerCase())).collect(Collectors.toList());
         return List.of();
     }
-                }
-                
+                                                  }
+                                      
