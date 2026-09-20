@@ -4,10 +4,11 @@ import me.vennlmao.ariscore.team.commands.TeamCommand;
 import me.vennlmao.ariscore.team.gui.TeamGuiBuilder;
 import me.vennlmao.ariscore.team.listeners.TeamChatListener;
 import me.vennlmao.ariscore.team.listeners.TeamDamageListener;
+import me.vennlmao.ariscore.team.listeners.TeamEnderChestListener;
 import me.vennlmao.ariscore.team.listeners.TeamGuiListener;
 import me.vennlmao.ariscore.team.listeners.TeamMoveListener;
 import me.vennlmao.ariscore.team.managers.TeamDatabaseManager;
-import me.vennlmao.ariscore.team.managers.TeamData;
+import me.vennlmao.ariscore.team.managers.TeamEnderChestManager;
 import me.vennlmao.ariscore.team.managers.TeamManager;
 import me.vennlmao.ariscore.team.managers.TeamWarmupManager;
 import me.vennlmao.ariscore.team.utils.MessageUtil;
@@ -25,6 +26,7 @@ public class TeamModule {
     private FileConfiguration config;
     private TeamDatabaseManager databaseManager;
     private TeamManager teamManager;
+    private TeamEnderChestManager enderChestManager;
     private TeamWarmupManager warmupManager;
     private TeamGuiBuilder guiBuilder;
     private TeamChatListener chatListener;
@@ -45,6 +47,7 @@ public class TeamModule {
         databaseManager.init();
 
         teamManager = new TeamManager(this, databaseManager);
+        enderChestManager = new TeamEnderChestManager(this, databaseManager);
         warmupManager = new TeamWarmupManager(this);
         guiBuilder = new TeamGuiBuilder(this);
         chatListener = new TeamChatListener(this);
@@ -57,6 +60,7 @@ public class TeamModule {
         plugin.getServer().getPluginManager().registerEvents(guiListener, plugin);
         plugin.getServer().getPluginManager().registerEvents(new TeamMoveListener(this), plugin);
         plugin.getServer().getPluginManager().registerEvents(new TeamDamageListener(this), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new TeamEnderChestListener(this), plugin);
 
         TeamCommand teamCmd = new TeamCommand(this);
         plugin.getCommand("team").setExecutor(teamCmd);
@@ -67,6 +71,7 @@ public class TeamModule {
 
     public void disable() {
         if (warmupManager != null) warmupManager.cancelAll();
+        if (enderChestManager != null) enderChestManager.saveAll();
         if (databaseManager != null) databaseManager.close();
     }
 
@@ -88,8 +93,10 @@ public class TeamModule {
     public JavaPlugin getPlugin() { return plugin; }
     public TeamDatabaseManager getDatabaseManager() { return databaseManager; }
     public TeamManager getTeamManager() { return teamManager; }
+    public TeamEnderChestManager getTeamEnderChestManager() { return enderChestManager; }
     public TeamWarmupManager getWarmupManager() { return warmupManager; }
     public TeamGuiBuilder getGuiBuilder() { return guiBuilder; }
     public TeamChatListener getChatListener() { return chatListener; }
     public TeamGuiListener getGuiListener() { return guiListener; }
-}
+    }
+    
