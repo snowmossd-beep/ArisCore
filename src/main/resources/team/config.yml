@@ -1,45 +1,283 @@
-warmup: 5
-cancel_distance: 0.1
-
 mysql:
   enabled: false
-  host: "host"
+  host: "localhost"
   port: 3306
-  database: "database"
-  username: "username"
-  password: "password"
-  table-prefix: "ariscore_"
+  database: "ariscore"
+  username: "root"
+  password: ""
   use-ssl: false
-
-sqlite:
-  enabled: true
+  table-prefix: "ariscore_"
 
 team:
-  max-members: 45
-  max-name-length: 16
   min-name-length: 3
+  max-name-length: 16
+  max-tag-length: 6
+  max-members: 45
+  invite-expiry-seconds: 60
+
+blocked_worlds: []
+
+endchest:
+  size: 27
+  title: "&5&lEnder Chest &7- &f{team-name}"
+
+warmup: 5
+cancel_distance: 0.3
+
+roles:
+  leader:
+    display-name: "&6Leader"
+    icon: "&6★"
+  admin:
+    display-name: "&eAdmin"
+    icon: "&e◆"
+    can-invite: true
+    can-kick: true
+    can-sethome: true
+    can-visit-home: true
+    can-team-chat: true
+    can-toggle-pvp: false
+    can-open-endchest: true
+  member:
+    display-name: "&7Member"
+    icon: "&7●"
+    can-invite: false
+    can-kick: false
+    can-sethome: false
+    can-visit-home: true
+    can-team-chat: true
+    can-toggle-pvp: false
+    can-open-endchest: true
+
+gui:
+  main:
+    title: "&8&l» &6{team-name} &8&l« &7({page})"
+    size: 54
+    border:
+      enabled: false
+      material: "BLACK_STAINED_GLASS_PANE"
+      display-name: " "
+      slots: []
+    empty-slot:
+      material: "GRAY_STAINED_GLASS_PANE"
+      display-name: "&7Trống"
+      lore:
+        - "&8Chưa có thành viên"
+    member-display:
+      online-line: "&a● Online"
+      offline-line: "&7● Offline"
+      role-line: "&7Chức vụ: {role}"
+      click-line: "&eNhấn để quản lý"
+    items:
+      team-info:
+        slot: 49
+        display-name: "&6&l{team-name} &7[{tag}]"
+        lore:
+          - "&7Leader: &f{leader}"
+          - "&7Thành viên: &f{count}&7/&f{max}"
+          - "&7Trang: &f{page}&7/&f{max-page}"
+      home:
+        slot: 48
+        material: "RED_BED"
+        display-name: "&d&lNhà Team"
+        lore:
+          - "&7Nhấn để dịch chuyển đến"
+          - "&7nhà của team."
+      pvp:
+        slot: 50
+        material: "IRON_SWORD"
+        display-name: "&c&lPVP: {pvp-status}"
+        status:
+          enabled: "&aBật"
+          disabled: "&cTắt"
+        lore:
+          - "&7Nhấn để bật/tắt PVP"
+          - "&7giữa các thành viên."
+      invite:
+        slot: 46
+        material: "EMERALD"
+        display-name: "&a&lMời Người Chơi"
+        lore:
+          - "&7Gõ &f/team invite <player>"
+          - "&7để mời vào team."
+      chat:
+        slot: 47
+        material: "WRITABLE_BOOK"
+        display-name: "&b&lTeam Chat"
+        lore:
+          - "&7Nhấn để bật/tắt"
+          - "&7chat riêng cho team."
+      endchest:
+        slot: 52
+        material: "ENDER_CHEST"
+        display-name: "&5&lEnder Chest Đội"
+        lore:
+          - "&7Kho đồ chung của cả team."
+          - "&7Nhấn để mở."
+      disband:
+        slot: 51
+        material: "BARRIER"
+        display-name: "&4&lGiải Tán Team"
+        lore:
+          - "&cXoá vĩnh viễn team này."
+      leave:
+        slot: 51
+        material: "OAK_DOOR"
+        display-name: "&c&lRời Team"
+        lore:
+          - "&7Nhấn để rời khỏi team."
+      previous-page:
+        slot: 45
+        material: "ARROW"
+        display-name: "&e« Trang trước"
+        lore: []
+      next-page:
+        slot: 53
+        material: "ARROW"
+        display-name: "&eTrang sau »"
+        lore: []
+  member-actions:
+    title: "&8&l» &6{player} &8&l«"
+    size: 27
+    border:
+      enabled: true
+      material: "BLACK_STAINED_GLASS_PANE"
+      display-name: " "
+      slots: [0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 13, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26]
+    head:
+      slot: 4
+      display-name: "&6{player}"
+      lore:
+        - "&7Chức vụ: &f{role}"
+    promote:
+      slot: 11
+      material: "LIME_DYE"
+      display-name: "&a&lThăng Chức"
+      lore:
+        - "&7Thăng &f{player} &7lên Admin."
+        - "&8(Chỉ leader)"
+    demote:
+      slot: 12
+      material: "GRAY_DYE"
+      display-name: "&7&lGiáng Chức"
+      lore:
+        - "&7Giáng &f{player} &7xuống Member."
+        - "&8(Chỉ leader)"
+    transfer:
+      slot: 14
+      material: "NETHER_STAR"
+      display-name: "&d&lChuyển Quyền Leader"
+      lore:
+        - "&7Chuyển quyền leader cho &f{player}&7."
+        - "&8(Chỉ leader)"
+    kick:
+      slot: 15
+      material: "BARRIER"
+      display-name: "&c&lĐuổi Khỏi Team"
+      lore:
+        - "&7Đuổi &f{player} &7khỏi team."
+    back:
+      slot: 22
+      material: "ARROW"
+      display-name: "&e« Quay lại"
+      lore: []
+  kick-confirm:
+    title: "&8Đuổi {player}?"
+    size: 27
+    border:
+      enabled: true
+      material: "RED_STAINED_GLASS_PANE"
+      display-name: " "
+      slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+    cancel:
+      slot: 11
+      material: "RED_CONCRETE"
+      display-name: "&c&lHuỷ"
+      lore: []
+    confirm:
+      slot: 15
+      material: "LIME_CONCRETE"
+      display-name: "&a&lXác Nhận Đuổi"
+      lore:
+        - "&7Đuổi &f{player} &7khỏi team."
+  leave-confirm:
+    title: "&8Rời Khỏi Team?"
+    size: 27
+    border:
+      enabled: true
+      material: "RED_STAINED_GLASS_PANE"
+      display-name: " "
+      slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+    cancel:
+      slot: 11
+      material: "RED_CONCRETE"
+      display-name: "&c&lHuỷ"
+      lore: []
+    confirm:
+      slot: 15
+      material: "LIME_CONCRETE"
+      display-name: "&a&lXác Nhận Rời Team"
+      lore: []
+  disband-confirm:
+    title: "&8Giải Tán Team?"
+    size: 27
+    border:
+      enabled: true
+      material: "RED_STAINED_GLASS_PANE"
+      display-name: " "
+      slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+    cancel:
+      slot: 11
+      material: "RED_CONCRETE"
+      display-name: "&c&lHuỷ"
+      lore: []
+    confirm:
+      slot: 15
+      material: "LIME_CONCRETE"
+      display-name: "&4&lXác Nhận Giải Tán"
+      lore:
+        - "&cKhông thể hoàn tác!"
+  transfer-confirm:
+    title: "&8Chuyển Leader Cho {player}?"
+    size: 27
+    border:
+      enabled: true
+      material: "PURPLE_STAINED_GLASS_PANE"
+      display-name: " "
+      slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26]
+    cancel:
+      slot: 11
+      material: "RED_CONCRETE"
+      display-name: "&c&lHuỷ"
+      lore: []
+    confirm:
+      slot: 15
+      material: "LIME_CONCRETE"
+      display-name: "&a&lXác Nhận Chuyển Quyền"
+      lore:
+        - "&7{player} &7sẽ trở thành leader mới."
 
 sounds:
-  click:
-    sound: UI_BUTTON_CLICK
+  success:
+    sound: ENTITY_PLAYER_LEVELUP
     volume: 1.0
-    pitch: 1.0
-  page_turn:
-    sound: ITEM_BOOK_PAGE_TURN
-    volume: 1.0
-    pitch: 1.0
+    pitch: 1.2
   error:
     sound: ENTITY_VILLAGER_NO
     volume: 1.0
     pitch: 1.0
-  success:
-    sound: ENTITY_PLAYER_LEVELUP
+  click:
+    sound: UI_BUTTON_CLICK
     volume: 1.0
     pitch: 1.0
-  invite:
-    sound: ENTITY_EXPERIENCE_ORB_PICKUP
+  page:
+    sound: UI_BUTTON_CLICK
     volume: 1.0
     pitch: 1.2
+  invite:
+    sound: BLOCK_NOTE_BLOCK_PLING
+    volume: 1.0
+    pitch: 1.3
   teleport:
     sound: ENTITY_ENDERMAN_TELEPORT
     volume: 1.0
@@ -50,235 +288,76 @@ sounds:
     pitch: 1.2
 
 messages:
-  no_team: "&cYou don't have a team."
-  no_team_ab: "&cYou don't have a team."
-  already_in_team: "&cYou already have a team."
-  already_in_team_ab: "&cYou already have a team."
-  not_owner: "&cYou are not the owner."
-  not_owner_ab: "&cYou are not the owner."
-  not_owner_or_coowner: "&cYou don't have permission."
-  not_owner_or_coowner_ab: "&cYou don't have permission."
-  player_not_found: "&cPlayer not found."
-  team_not_found: "&cTeam not found."
-  team_full: "&cThe team is full."
-  team_full_ab: "&cThe team is full."
-  name_too_short: "&cTeam name is too short."
-  name_too_long: "&cTeam name is too long."
-  name_taken: "&cThat team name is already taken."
-  create: "&aTeam created."
-  create_ab: "&aTeam created."
-  disband: "&cThe team has been disbanded."
-  disband_ab: "&cTeam disbanded."
-  disband_notify: "&cThe team was disbanded by the owner."
-  join: "&7You joined the team &#00A3FB{team}."
-  join_ab: "&7You joined the team &#00A3FB{team}."
-  join_notify: "&7{player} joined the team."
-  leave: "&7You left the team."
-  leave_ab: "&7You left the team."
-  leave_notify: "&#00A3FB{player} &7left the team."
-  kick: "&7Kicked &#00A3FB{player} &7from the team."
-  kick_ab: "&7Kicked &#00A3FB{player} &7from the team."
-  kick_notify: "&7You were kicked from the team."
-  invite_sent: "&7Invited &#00A3FB{player} &7to the team."
-  invite_sent_ab: "&7Invited &#00A3FB{player} &7to the team."
-  invite_received: "&#00A3FB{player} &7invited you to the team &#00A3FB{team}&f."
-  invite_received_ab: "&#00A3FB{player} &7invited you to the team &#00A3FB{team}&f."
-  invite_expired: "&cThe invitation has expired."
-  no_invite: "&cThe invitation has expired."
-  already_member: "&#00A3FB{player} &7is already a member."
-  sethome: "&7Team home set."
-  sethome_ab: "&7Team home set"
-  delhome: "&7Team home delete."
-  delhome_ab: "&7Team home delete."
-  home_not_set: "&cThe team doesn't have a home set."
-  home_not_set_ab: "&cThe team doesn't have a home set."
-  teleport_home: "&aTeleported successfully!"
-  teleport_home_ab: "&aTeleported successfully!"
-  chat_format: "&#00A3FB[Team] {player}&7: {message}"
-  chat_toggle_on: "&aTeam chat enabled."
-  chat_toggle_on_ab: "&aTeam chat enabled"
-  chat_toggle_off: "&cTeam chat disabled."
-  chat_toggle_off_ab: "&cTeam chat disabled."
-  promote_coowner: "&7Promoted &#00A3FB{player} &7to Co-Owner."
-  demote_member: "&7Demoted &#00A3FB{player} &7to Member."
-  teleporting_chat: "&7Teleporting in &#00A3FB{seconds}&7 seconds."
-  teleporting_ab: "&7Teleporting in &#00A3FB{seconds}&7 seconds..."
-  teleport_cancelled_moved: "&cTeleport cancelled because you moved!"
-  teleport_cancelled_moved_ab: "&cTeleport cancelled because you moved!"
-  teleport_cancelled_damaged: "&cTeleport cancelled because you were attacked!"
-  teleport_cancelled_damaged_ab: "&cTeleport cancelled because you were attacked!"
-  world_blocked: "&cYou cannot set a home in this world."
-  world_blocked_ab: "&cYou cannot set a home in this world."
-  owner_cannot_edit_self: "&cYou are the team owner, you cannot edit your own permissions!"
-  owner_cannot_edit_self_ab: "&cYou are the team owner, you cannot edit your own permissions!"
-  member_cannot_edit: "&cYou must be the team owner to edit permissions!"
-  member_cannot_edit_ab: "&cYou must be the team owner to edit permissions!"
-  no_permission: "&cYou don't have permission."
-
-blocked_worlds:
-  - world_nether
-  - world_the_end
-
-gui:
-  main:
-    title: "&8ᴛᴇᴀᴍ (Page {page})"
-    size: 54
-
-teammate-display:
-  online-prefix: '&a❏'
-  offline-prefix: '&c❏'
-  name-color: '&#34eb9b'
-  leader-indicator: ' &6★'
-  leader-lore: '&6Team Leader'
-  member-lore: '&fClick to edit'
-
-items:
-  back:
-    slot: 48
-    material: ARROW
-    display-name: '&#34eb9bʙᴀᴄᴋ'
-    lore:
-      - '&fClick to go to previous page'
-  team-info:
-    slot: 49
-    material: IRON_HELMET
-    display-name: '&#34eb9bᴛᴇᴀᴍ {team-name}'
-    lore:
-      - '&7Members: &f{count}/{max}'
-  next:
-    slot: 50
-    material: ARROW
-    display-name: '&#34eb9bɴᴇxᴛ'
-    lore:
-      - '&fClick to go to next page'
-  team-home:
-    slot: 52
-    material: WHITE_BANNER
-    display-name: '&#34eb9bᴛᴇᴀᴍ ʜᴏᴍᴇ'
-    lore:
-      - '&fTeleport to team home'
-  pvp:
-    slot: 53
-    material: DIAMOND_SWORD
-    display-name: '&#34eb9bᴘᴠᴘ'
-    lore:
-      - '&fCurrently: {pvp-status}'
-    status:
-      enabled: '&#34eb9b&lON'
-      disabled: '&#FF0000&lOFF'
-  empty-member:
-    material: GRAY_STAINED_GLASS_PANE
-    display-name: '&#34eb9bɪɴᴠɪᴛᴇ'
-    lore:
-      - '&fClick to invite a new player'
-  player-head:
-    online-indicator: '&a● Online'
-    offline-indicator: '&c● Offline'
-    click-lore: '&fClick to manage'
-
-permission-gui:
-  title: 'ᴇᴅɪᴛ ᴘᴇʀᴍɪssɪᴏɴs'
-  size: 27
-  permissions:
-    edit-home:
-      slot: 10
-      material: WHITE_BANNER
-      display-name: '&#34eb9bᴇᴅɪᴛ ʜᴏᴍᴇ'
-      lore:
-        - '&fLet {player-name} set/remove team home'
-        - '&fCurrently: {status}'
-    kick-player:
-      slot: 11
-      material: OAK_DOOR
-      display-name: '&#34eb9bᴋɪᴄᴋ'
-      lore:
-        - '&fClick to kick {player-name}'
-    manage-teammates:
-      slot: 12
-      material: IRON_HELMET
-      display-name: '&#34eb9bᴋɪᴄᴋ ᴍᴇᴍʙᴇʀs'
-      lore:
-        - '&fLet {player-name} kick members'
-        - '&fCurrently: {status}'
-    pvp-toggle:
-      slot: 13
-      material: IRON_SWORD
-      display-name: '&#34eb9bᴘᴠᴘ'
-      lore:
-        - '&fLet {player-name} toggle team pvp'
-        - '&fCurrently: {status}'
-    visit-home:
-      slot: 14
-      material: ENDER_PEARL
-      display-name: '&#34eb9bᴠɪsɪᴛ ʜᴏᴍᴇ'
-      lore:
-        - '&fLet {player-name} go to team home'
-        - '&fCurrently: {status}'
-    team-chat:
-      slot: 15
-      material: FEATHER
-      display-name: '&#34eb9bᴛᴇᴀᴍ ᴄʜᴀᴛ'
-      lore:
-        - '&fLet {player-name} use team chat'
-        - '&fCurrently: {status}'
-    invite-players:
-      slot: 16
-      material: WRITABLE_BOOK
-      display-name: '&#34eb9bɪɴᴠɪᴛᴇ'
-      lore:
-        - '&fLet {player-name} invite players'
-        - '&fCurrently: {status}'
-  back-button:
-    slot: 18
-    material: RED_STAINED_GLASS_PANE
-    display-name: '&cʙᴀᴄᴋ'
-    lore:
-      - '&fClick to return'
-
-kick-confirmation-gui:
-  title: 'ᴄᴏɴғɪʀᴍ ᴋɪᴄᴋ'
-  size: 27
-  cancel:
-    slot: 11
-    material: RED_STAINED_GLASS_PANE
-    display-name: '&#e00202ᴄᴀɴᴄᴇʟ'
-    lore:
-      - '&fClick to cancel'
-  confirm:
-    slot: 15
-    material: LIME_STAINED_GLASS_PANE
-    display-name: '&#02de4fᴄᴏɴғɪʀᴍ'
-    lore:
-      - '&fClick to kick'
-
-leave-confirmation-gui:
-  title: 'ᴄᴏɴғɪʀᴍ ʟᴇᴀᴠɪɴɢ ᴛᴇᴀᴍ'
-  size: 27
-  cancel:
-    slot: 11
-    material: RED_STAINED_GLASS_PANE
-    display-name: '&#e00202ᴄᴀɴᴄᴇʟ'
-    lore:
-      - '&fClick to cancel'
-  confirm:
-    slot: 15
-    material: LIME_STAINED_GLASS_PANE
-    display-name: '&#02de4fᴄᴏɴғɪʀᴍ'
-    lore:
-      - '&fClick to leave'
-
-disband-confirmation-gui:
-  title: 'ᴄᴏɴғɪʀᴍ ᴅɪsʙᴀɴᴅɪɴɢ ᴛᴇᴀᴍ'
-  size: 27
-  cancel:
-    slot: 11
-    material: RED_STAINED_GLASS_PANE
-    display-name: '&#e00202ᴄᴀɴᴄᴇʟ'
-    lore:
-      - '&fClick to cancel'
-  confirm:
-    slot: 15
-    material: LIME_STAINED_GLASS_PANE
-    display-name: '&#02de4fᴄᴏɴғɪʀᴍ'
-    lore:
-      - '&fClick to delete'
+  usage: "&cSử dụng: /team <create|invite|accept|deny|leave|kick|promote|demote|transfer|sethome|delhome|home|chat|pvp|tag|info|list>"
+  no_team: "&cBạn chưa có team."
+  no_permission: "&cBạn không có quyền làm điều này."
+  member_cannot_manage: "&cBạn không có quyền quản lý thành viên."
+  create: "&aĐã tạo team &f{team}&a!"
+  create_ab: "&aTạo team thành công!"
+  name_too_short: "&cTên team quá ngắn."
+  name_too_long: "&cTên team quá dài."
+  name_taken: "&cTên team đã tồn tại."
+  already_in_team: "&cBạn đã ở trong 1 team rồi."
+  not_leader: "&cChỉ leader mới làm được điều này."
+  leader_must_transfer: "&cBạn là leader, hãy chuyển quyền trước khi rời team."
+  invite_sent: "&aĐã gửi lời mời cho &f{player}&a."
+  invite_sent_ab: "&aĐã gửi lời mời!"
+  invite_received: "&e{player} &7đã mời bạn vào team &f{team}&7."
+  invite_received_ab: "&eGõ /team accept để tham gia!"
+  invite_hint: "&7Gõ &f/team invite <player> &7để mời."
+  invite_denied: "&cĐã từ chối lời mời."
+  already_member: "&c{player} đã ở trong team rồi."
+  already_admin: "&cNgười này đã là Admin rồi."
+  already_not_admin: "&cNgười này không phải Admin."
+  target_has_team: "&c{player} đã có team khác."
+  team_full: "&cTeam đã đầy thành viên."
+  player_not_found: "&cKhông tìm thấy người chơi."
+  no_invite: "&cBạn không có lời mời nào."
+  team_not_found: "&cKhông tìm thấy team này."
+  join: "&aĐã tham gia team &f{team}&a!"
+  join_ab: "&aTham gia team thành công!"
+  join_notify: "&e{player} &7đã tham gia team."
+  leave: "&aĐã rời khỏi team &f{team}&a."
+  leave_notify: "&e{player} &7đã rời khỏi team."
+  kick: "&aĐã đuổi &f{player} &akhỏi team."
+  kick_ab: "&aĐã đuổi thành viên!"
+  kick_notify: "&cBạn đã bị đuổi khỏi team &f{team}&c."
+  cannot_kick_leader: "&cKhông thể đuổi leader."
+  only_leader_can_promote: "&cChỉ leader mới thăng chức được."
+  only_leader_can_demote: "&cChỉ leader mới giáng chức được."
+  promote: "&aĐã thăng chức &f{player} &alên Admin."
+  promote_notify: "&aBạn đã được thăng chức lên Admin trong team &f{team}&a!"
+  demote: "&aĐã giáng chức &f{player} &axuống Member."
+  demote_notify: "&cBạn đã bị giáng chức xuống Member trong team &f{team}&c."
+  cannot_transfer_self: "&cBạn đã là leader rồi."
+  transfer: "&aĐã chuyển quyền leader cho &f{player}&a."
+  transfer_notify: "&aBạn đã trở thành leader mới của team &f{team}&a!"
+  world_blocked: "&cKhông thể đặt nhà team ở world này."
+  world_blocked_ab: "&cWorld bị chặn!"
+  sethome: "&aĐã đặt nhà team tại vị trí hiện tại."
+  sethome_ab: "&aĐã đặt nhà team!"
+  delhome: "&aĐã xoá nhà team."
+  delhome_ab: "&aĐã xoá nhà team!"
+  home_not_set: "&cTeam chưa đặt nhà."
+  home_not_set_ab: "&cChưa đặt nhà!"
+  chat_toggle_on: "&aĐã bật team chat."
+  chat_toggle_on_ab: "&aTeam chat: BẬT"
+  chat_toggle_off: "&7Đã tắt team chat."
+  chat_toggle_off_ab: "&7Team chat: TẮT"
+  chat_format: "&8[&6Team&8] &f{player}&7: &f{message}"
+  pvp_toggled: "&aĐã đổi trạng thái PVP: &f{status}"
+  tag_too_long: "&cTag quá dài."
+  tag_set: "&aĐã đặt tag team: &f[{tag}]"
+  no_teams_exist: "&7Chưa có team nào được tạo."
+  disband: "&aĐã giải tán team &f{team}&a."
+  disband_ab: "&aĐã giải tán team!"
+  disband_notify: "&cTeam &f{team} &cđã bị giải tán."
+  teleport_home: "&aĐã dịch chuyển đến nhà team!"
+  teleport_home_ab: "&aĐã đến nơi!"
+  teleporting_chat: "&7Đang dịch chuyển sau &f{seconds}s&7..."
+  teleporting_ab: "&7Dịch chuyển sau {seconds}s..."
+  teleport_cancelled_damaged: "&cDịch chuyển bị huỷ vì bạn bị tấn công!"
+  teleport_cancelled_damaged_ab: "&cĐã huỷ dịch chuyển!"
+  teleport_cancelled_moved: "&cDịch chuyển bị huỷ vì bạn di chuyển!"
+  teleport_cancelled_moved_ab: "&cĐã huỷ dịch chuyển!"
+  
