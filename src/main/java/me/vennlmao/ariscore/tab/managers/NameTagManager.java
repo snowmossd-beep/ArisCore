@@ -125,16 +125,23 @@ public class NameTagManager implements Listener {
 
     private void applyTeam(Scoreboard sb, String teamName, String entry, String tag) {
         try {
+            Team existingForEntry = sb.getEntryTeam(entry);
+            if (existingForEntry != null && !existingForEntry.getName().equals(teamName)) {
+                existingForEntry.removeEntry(entry);
+            }
+
             Team team = sb.getTeam(teamName);
             if (team == null) team = sb.registerNewTeam(teamName);
             team.setPrefix(tag != null ? tag : "");
             team.setSuffix("");
             if (!team.hasEntry(entry)) team.addEntry(entry);
-        } catch (Throwable ignored) {}
+        } catch (Throwable e) {
+            plugin.getLogger().warning("[Tab/Nametag] applyTeam failed for entry '" + entry + "': " + e);
+        }
     }
 
     private String truncate(String s, int max) {
         if (s == null) return "";
         return s.length() > max ? s.substring(0, max) : s;
     }
-}
+                          }
