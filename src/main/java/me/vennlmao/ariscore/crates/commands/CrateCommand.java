@@ -168,10 +168,10 @@ public class CrateCommand implements CommandExecutor, TabCompleter {
         }
 
         int finalAmount = amount;
-        gamer.addKeyAmount(crateName, finalAmount);
+        gamer.addKeyAmount(crate.getName(), finalAmount);
         msg.send(sender, "key-given",
                 "{amount}", String.valueOf(finalAmount),
-                "{crate}", crateName,
+                "{crate}", crate.getName(),
                 "{player}", target.getName());
     }
 
@@ -213,10 +213,10 @@ public class CrateCommand implements CommandExecutor, TabCompleter {
         }
 
         int finalAmount = amount;
-        gamer.removeKeyAmount(crateName, finalAmount);
+        gamer.removeKeyAmount(crate.getName(), finalAmount);
         msg.send(sender, "key-taken",
                 "{amount}", String.valueOf(finalAmount),
-                "{crate}", crateName,
+                "{crate}", crate.getName(),
                 "{player}", target.getName());
     }
 
@@ -327,4 +327,5 @@ public class CrateCommand implements CommandExecutor, TabCompleter {
 
         return new ArrayList<>();
     }
-}
+                    }
+                        
