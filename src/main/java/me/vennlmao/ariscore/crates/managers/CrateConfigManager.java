@@ -149,6 +149,10 @@ public class CrateConfigManager {
             }
         }
 
+        if (items.isEmpty() && icon != null) {
+            items.add(icon.clone());
+        }
+
         return new RewardInfo(slot, icon != null ? icon : new ItemStack(org.bukkit.Material.STONE), items);
     }
 
@@ -289,4 +293,5 @@ public class CrateConfigManager {
         }
     }
     }
-                    
+
+                
