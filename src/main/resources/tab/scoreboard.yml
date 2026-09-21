@@ -36,7 +36,7 @@ scoreboards:
       - '&#A303F9★ &fShards &#A303F9%ariscore_shards%'
       - '&#FC0000🗡 &fKills &#FC0000%statistic_player_kills%'
       - '&#F97603☠ &fDeaths &#F97603%statistic_deaths%'
-      - '&#00A4FC⌛ &fKeyall &#00A4FC%ariscrates_keyall_time%'
+      - '&#00A4FC⌛ &fKeyall &#00A4FC%ariscore_keyall_time%'
       - '&#FCE300⌚ &fPlaytime &#FCE300%statistic_hours_played%h %statistic_time_played:minutes%m'
       - ''
       - '&7VietNam (&#00A4FC%player_ping%&#A8A8A8)'
