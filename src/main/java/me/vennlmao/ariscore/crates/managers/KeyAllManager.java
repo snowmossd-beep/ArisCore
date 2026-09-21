@@ -67,7 +67,7 @@ public class KeyAllManager {
                     module.getPlugin().getLogger().warning("[Crates] KeyAll: unknown crate '" + crateName + "'");
                     continue;
                 }
-                gamer.addKeyAmount(crateName, entry.getValue());
+                gamer.addKeyAmount(crate.getName(), entry.getValue());
             }
 
             Player online = module.getPlugin().getServer().getPlayer(gamer.getUniqueId());
@@ -109,4 +109,5 @@ public class KeyAllManager {
 
         return new KeyAllConfig(interval, keyRewards, title, subtitle);
     }
-}
+            }
+            
