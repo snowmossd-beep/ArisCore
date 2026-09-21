@@ -19,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NameTagManager implements Listener {
 
     private static final String TEAM_PREFIX = "nt_";
+    private static final String NAME_PLACEHOLDER = "%player_name%";
+    private static final int MAX_LENGTH = 64;
 
     private final ArisCore plugin;
     private final PapiManager papi;
@@ -77,22 +79,29 @@ public class NameTagManager implements Listener {
     private void tick(Player player) {
         if (!player.isOnline()) return;
 
-        String tag = truncate(papi.parse(player, config.getNametagTag()), 16);
+        String template = config.getNametagTag();
+        int idx = template.indexOf(NAME_PLACEHOLDER);
+        String prefixTemplate = idx >= 0 ? template.substring(0, idx) : template;
+        String suffixTemplate = idx >= 0 ? template.substring(idx + NAME_PLACEHOLDER.length()) : "";
+
+        String prefix = truncate(papi.parse(player, prefixTemplate), MAX_LENGTH);
+        String suffix = truncate(papi.parse(player, suffixTemplate), MAX_LENGTH);
+        String combined = prefix + "\u0000" + suffix;
 
         UUID id = player.getUniqueId();
         Scoreboard sb = player.getScoreboard();
         String sbId = sb == null ? "null" : sb.toString();
 
-        boolean changed = !tag.equals(lastTag.get(id)) || !sbId.equals(lastSbId.get(id));
+        boolean changed = !combined.equals(lastTag.get(id)) || !sbId.equals(lastSbId.get(id));
         if (!changed) return;
 
-        lastTag.put(id, tag);
+        lastTag.put(id, combined);
         lastSbId.put(id, sbId);
 
-        applyToAllBoards(player, tag);
+        applyToAllBoards(player, prefix, suffix);
     }
 
-    private void applyToAllBoards(Player player, String tag) {
+    private void applyToAllBoards(Player player, String prefix, String suffix) {
         try {
             if (!player.isOnline()) return;
 
@@ -102,18 +111,18 @@ public class NameTagManager implements Listener {
             String teamName  = TEAM_PREFIX + shortName;
 
             Scoreboard sb = player.getScoreboard();
-            if (sb != null) applyTeam(sb, teamName, rawName, tag);
+            if (sb != null) applyTeam(sb, teamName, rawName, prefix, suffix);
 
             Scoreboard main = Bukkit.getScoreboardManager() != null
                     ? Bukkit.getScoreboardManager().getMainScoreboard() : null;
             if (main != null && !main.equals(sb)) {
-                applyTeam(main, teamName, rawName, tag);
+                applyTeam(main, teamName, rawName, prefix, suffix);
             }
 
             for (Player other : Bukkit.getOnlinePlayers()) {
                 Scoreboard otherSb = other.getScoreboard();
                 if (otherSb != null && !otherSb.equals(sb) && !otherSb.equals(main)) {
-                    applyTeam(otherSb, teamName, rawName, tag);
+                    applyTeam(otherSb, teamName, rawName, prefix, suffix);
                 }
             }
 
@@ -123,7 +132,7 @@ public class NameTagManager implements Listener {
         }
     }
 
-    private void applyTeam(Scoreboard sb, String teamName, String entry, String tag) {
+    private void applyTeam(Scoreboard sb, String teamName, String entry, String prefix, String suffix) {
         try {
             Team existingForEntry = sb.getEntryTeam(entry);
             if (existingForEntry != null && !existingForEntry.getName().equals(teamName)) {
@@ -132,8 +141,8 @@ public class NameTagManager implements Listener {
 
             Team team = sb.getTeam(teamName);
             if (team == null) team = sb.registerNewTeam(teamName);
-            team.setPrefix(tag != null ? tag : "");
-            team.setSuffix("");
+            team.setPrefix(prefix != null ? prefix : "");
+            team.setSuffix(suffix != null ? suffix : "");
             if (!team.hasEntry(entry)) team.addEntry(entry);
         } catch (Throwable e) {
             plugin.getLogger().warning("[Tab/Nametag] applyTeam failed for entry '" + entry + "': " + e);
@@ -144,4 +153,4 @@ public class NameTagManager implements Listener {
         if (s == null) return "";
         return s.length() > max ? s.substring(0, max) : s;
     }
-                          }
+            }
