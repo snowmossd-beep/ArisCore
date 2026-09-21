@@ -11,15 +11,15 @@ public class CrateRegistry {
     private final Map<String, CrateModel> registry = new HashMap<>();
 
     public void cache(CrateModel crateModel) {
-        registry.put(crateModel.getName(), crateModel);
+        registry.put(crateModel.getName().toLowerCase(), crateModel);
     }
 
     public CrateModel find(String name) {
-        return registry.get(name);
+        return name != null ? registry.get(name.toLowerCase()) : null;
     }
 
     public CrateModel remove(String name) {
-        return registry.remove(name);
+        return name != null ? registry.remove(name.toLowerCase()) : null;
     }
 
     public Collection<CrateModel> values() {
@@ -30,3 +30,4 @@ public class CrateRegistry {
         registry.clear();
     }
 }
+ 
