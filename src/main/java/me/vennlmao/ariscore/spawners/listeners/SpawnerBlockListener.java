@@ -123,10 +123,11 @@ public class SpawnerBlockListener implements Listener {
 
         Player player = event.getPlayer();
         boolean silkRequired = module.getConfig().getBoolean("silk-touch-required", true);
+        boolean bypassSilkTouch = player.hasPermission("ariscore.spawners.admin");
         ItemStack tool = player.getInventory().getItemInMainHand();
         boolean hasSilkTouch = tool.containsEnchantment(Enchantment.SILK_TOUCH);
 
-        if (silkRequired && !hasSilkTouch) {
+        if (silkRequired && !hasSilkTouch && !bypassSilkTouch) {
             event.setCancelled(true);
             MessageUtil.sendChat(player, "silk_touch_required");
             return;
@@ -139,8 +140,14 @@ public class SpawnerBlockListener implements Listener {
         long remaining = data.getAmount() - dropAmount;
 
         Location dropLoc = block.getLocation().add(0.5, 0.5, 0.5);
-        ItemStack drop = SpawnerItemUtil.createItem(data.getEntityType(), dropAmount);
-        block.getWorld().dropItemNaturally(dropLoc, drop);
+        long dropRemaining = dropAmount;
+        while (dropRemaining > 0) {
+            int give = (int) Math.min(dropRemaining, 64);
+            ItemStack drop = SpawnerItemUtil.createItem(data.getEntityType(), 1);
+            drop.setAmount(give);
+            block.getWorld().dropItemNaturally(dropLoc, drop);
+            dropRemaining -= give;
+        }
 
         if (remaining > 0) {
             event.setCancelled(true);
@@ -155,4 +162,4 @@ public class SpawnerBlockListener implements Listener {
 
         SoundUtil.play(player, "break");
     }
-                }
+    }
