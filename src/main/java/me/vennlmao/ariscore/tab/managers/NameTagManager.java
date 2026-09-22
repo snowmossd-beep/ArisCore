@@ -15,6 +15,7 @@ import org.bukkit.scoreboard.Team;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 public class NameTagManager implements Listener {
 
@@ -37,7 +38,9 @@ public class NameTagManager implements Listener {
 
     public void start() {
         if (!config.isNametagEnabled()) return;
-        for (Player p : Bukkit.getOnlinePlayers()) schedule(p);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (isRealPlayer(p)) schedule(p);
+        }
     }
 
     public void stop() {
@@ -52,7 +55,12 @@ public class NameTagManager implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         if (!config.isNametagEnabled()) return;
         Player player = e.getPlayer();
+        if (!isRealPlayer(player)) return;
         player.getScheduler().runDelayed((Plugin) plugin, t -> schedule(player), () -> {}, 5L);
+    }
+
+    private boolean isRealPlayer(Player player) {
+        return player.getAddress() != null;
     }
 
     @EventHandler
@@ -92,7 +100,7 @@ public class NameTagManager implements Listener {
 
         lastTag.put(id, combined);
 
-        Bukkit.getGlobalRegionScheduler().run((Plugin) plugin, task -> applyToAllBoards(player, prefix, suffix));
+        applyToAllBoards(player, prefix, suffix);
     }
 
     private void applyToAllBoards(Player player, String prefix, String suffix) {
@@ -113,16 +121,9 @@ public class NameTagManager implements Listener {
                 applyTeam(main, teamName, rawName, prefix, suffix);
             }
 
-            for (Player other : Bukkit.getOnlinePlayers()) {
-                Scoreboard otherSb = other.getScoreboard();
-                if (otherSb != null && !otherSb.equals(sb) && !otherSb.equals(main)) {
-                    applyTeam(otherSb, teamName, rawName, prefix, suffix);
-                }
-            }
-
         } catch (Throwable e) {
-            plugin.getLogger().warning("[Tab/Nametag] Failed to apply team for "
-                    + player.getName() + ": " + e.getMessage());
+            plugin.getLogger().log(Level.WARNING, "[Tab/Nametag] Failed to apply team for "
+                    + player.getName(), e);
         }
     }
 
@@ -139,7 +140,7 @@ public class NameTagManager implements Listener {
             team.setSuffix(suffix != null ? suffix : "");
             if (!team.hasEntry(entry)) team.addEntry(entry);
         } catch (Throwable e) {
-            plugin.getLogger().warning("[Tab/Nametag] applyTeam failed for entry '" + entry + "': " + e);
+            plugin.getLogger().log(Level.WARNING, "[Tab/Nametag] applyTeam failed for entry '" + entry + "'", e);
         }
     }
 
@@ -147,4 +148,4 @@ public class NameTagManager implements Listener {
         if (s == null) return "";
         return s.length() > max ? s.substring(0, max) : s;
     }
-            }
+                }
