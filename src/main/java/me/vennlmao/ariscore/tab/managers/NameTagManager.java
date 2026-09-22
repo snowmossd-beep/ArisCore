@@ -26,9 +26,8 @@ public class NameTagManager implements Listener {
     private final PapiManager papi;
     private final TabConfigManager config;
 
-    private final Map<UUID, ScheduledTask> tasks    = new ConcurrentHashMap<>();
-    private final Map<UUID, String>        lastTag  = new ConcurrentHashMap<>();
-    private final Map<UUID, String>        lastSbId = new ConcurrentHashMap<>();
+    private final Map<UUID, ScheduledTask> tasks   = new ConcurrentHashMap<>();
+    private final Map<UUID, String>        lastTag = new ConcurrentHashMap<>();
 
     public NameTagManager(ArisCore plugin, PapiManager papi, TabConfigManager config, Scoreboard ignored) {
         this.plugin = plugin;
@@ -45,7 +44,6 @@ public class NameTagManager implements Listener {
         tasks.values().forEach(t -> { try { t.cancel(); } catch (Throwable ignored) {} });
         tasks.clear();
         lastTag.clear();
-        lastSbId.clear();
     }
 
     public void reload() { stop(); start(); }
@@ -63,7 +61,6 @@ public class NameTagManager implements Listener {
         ScheduledTask t = tasks.remove(id);
         if (t != null) try { t.cancel(); } catch (Throwable ignored) {}
         lastTag.remove(id);
-        lastSbId.remove(id);
     }
 
     private void schedule(Player player) {
@@ -89,16 +86,13 @@ public class NameTagManager implements Listener {
         String combined = prefix + "\u0000" + suffix;
 
         UUID id = player.getUniqueId();
-        Scoreboard sb = player.getScoreboard();
-        String sbId = sb == null ? "null" : sb.toString();
 
-        boolean changed = !combined.equals(lastTag.get(id)) || !sbId.equals(lastSbId.get(id));
+        boolean changed = !combined.equals(lastTag.get(id));
         if (!changed) return;
 
         lastTag.put(id, combined);
-        lastSbId.put(id, sbId);
 
-        applyToAllBoards(player, prefix, suffix);
+        Bukkit.getGlobalRegionScheduler().run((Plugin) plugin, task -> applyToAllBoards(player, prefix, suffix));
     }
 
     private void applyToAllBoards(Player player, String prefix, String suffix) {
