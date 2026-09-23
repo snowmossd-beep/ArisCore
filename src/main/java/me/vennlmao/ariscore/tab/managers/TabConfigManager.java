@@ -60,7 +60,7 @@ public class TabConfigManager {
         tabProfiles   = parseTabProfiles(tabCfg);
 
         nametagEnabled      = tabCfg.getBoolean("nametag.enabled", true);
-        nametagTag          = tabCfg.getString("nametag.tag", "%luckperms_prefix%%player_name%%luckperms_suffix%");
+        nametagTag          = tabCfg.getString("nametag.tag", "");
         nametagUpdateTicks  = tabCfg.getLong("nametag.update-interval-ticks", 40L);
 
         belownameEnabled            = tabCfg.getBoolean("belowname-objective.enabled", false);
