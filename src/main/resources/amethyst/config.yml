@@ -11,6 +11,10 @@ messages:
   self-set-success: '&aSelf-destruct timer set to &f{time}&a on this item.'
 
 tools:
+  blocked-blocks:
+    - BEDROCK
+    - SPAWNER
+    - BARRIER
   pickaxe:
     display-name: '&#b466dfᴀᴍᴇᴛʜʏꜱᴛ ᴅʀɪʟʟ'
     material: NETHERITE_PICKAXE
@@ -140,4 +144,3 @@ self-destruct:
     - treechopper
     - magichoe
   max-time-days: 30
-  
