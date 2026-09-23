@@ -1,16 +1,5 @@
 enabled: true
 
-nametag:
-  enabled: true
-  tag: '%luckperms_prefix%'
-  update-interval-ticks: 40
-
-belowname-objective:
-  enabled: true
-  text: '&#FFD700❤ HP'
-  value-placeholder: '%player_health_rounded%'
-  update-interval-ticks: 20
-
 tabs:
   world:
     world: 'rtpqueue'
