@@ -18,6 +18,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 public class BelownameManager implements Listener {
 
@@ -26,14 +27,16 @@ public class BelownameManager implements Listener {
     private final ArisCore plugin;
     private final PapiManager papi;
     private final TabConfigManager config;
+    private final Scoreboard sharedScoreboard;
 
     private final Map<UUID, ScheduledTask> tasks   = new ConcurrentHashMap<>();
     private final Map<UUID, Integer>       lastVal = new ConcurrentHashMap<>();
 
-    public BelownameManager(ArisCore plugin, PapiManager papi, TabConfigManager config) {
+    public BelownameManager(ArisCore plugin, PapiManager papi, TabConfigManager config, Scoreboard sharedScoreboard) {
         this.plugin = plugin;
         this.papi   = papi;
         this.config = config;
+        this.sharedScoreboard = sharedScoreboard;
     }
 
     public void start() {
@@ -68,25 +71,25 @@ public class BelownameManager implements Listener {
 
     private void setupObjective() {
         try {
-            Scoreboard main = Bukkit.getScoreboardManager() != null
-                    ? Bukkit.getScoreboardManager().getMainScoreboard() : null;
-            if (main == null) return;
-            Objective obj = main.getObjective(OBJECTIVE_NAME);
-            if (obj == null) obj = main.registerNewObjective(OBJECTIVE_NAME, Criteria.DUMMY,
+            if (sharedScoreboard == null) return;
+            Objective obj = sharedScoreboard.getObjective(OBJECTIVE_NAME);
+            if (obj == null) obj = sharedScoreboard.registerNewObjective(OBJECTIVE_NAME, Criteria.DUMMY,
                     LegacyComponentSerializer.legacySection().deserialize(config.getBelownameText()));
             else obj.displayName(LegacyComponentSerializer.legacySection().deserialize(config.getBelownameText()));
             obj.setDisplaySlot(DisplaySlot.BELOW_NAME);
-        } catch (Throwable ignored) {}
+        } catch (Throwable e) {
+            plugin.getLogger().log(Level.WARNING, "[Tab/Belowname] Failed to set up objective", e);
+        }
     }
 
     private void removeObjective() {
         try {
-            Scoreboard main = Bukkit.getScoreboardManager() != null
-                    ? Bukkit.getScoreboardManager().getMainScoreboard() : null;
-            if (main == null) return;
-            Objective obj = main.getObjective(OBJECTIVE_NAME);
+            if (sharedScoreboard == null) return;
+            Objective obj = sharedScoreboard.getObjective(OBJECTIVE_NAME);
             if (obj != null) obj.unregister();
-        } catch (Throwable ignored) {}
+        } catch (Throwable e) {
+            plugin.getLogger().log(Level.WARNING, "[Tab/Belowname] Failed to remove objective", e);
+        }
     }
 
     private void schedule(Player player) {
@@ -102,6 +105,10 @@ public class BelownameManager implements Listener {
     private void tick(Player player) {
         if (!player.isOnline()) return;
         try {
+            if (sharedScoreboard != null && !sharedScoreboard.equals(player.getScoreboard())) {
+                player.setScoreboard(sharedScoreboard);
+            }
+
             String parsed = papi.parse(player, config.getBelownameValuePlaceholder());
             int value = parseIntSafe(parsed);
 
@@ -110,13 +117,14 @@ public class BelownameManager implements Listener {
             if (last != null && last == value) return;
             lastVal.put(id, value);
 
-            Scoreboard main = Bukkit.getScoreboardManager() != null
-                    ? Bukkit.getScoreboardManager().getMainScoreboard() : null;
-            if (main == null) return;
-            Objective obj = main.getObjective(OBJECTIVE_NAME);
+            if (sharedScoreboard == null) return;
+            Objective obj = sharedScoreboard.getObjective(OBJECTIVE_NAME);
             if (obj == null) return;
             obj.getScore(player.getName()).setScore(value);
-        } catch (Throwable ignored) {}
+        } catch (Throwable e) {
+            plugin.getLogger().log(Level.WARNING, "[Tab/Belowname] Failed to update score for "
+                    + player.getName(), e);
+        }
     }
 
     private int parseIntSafe(String s) {
@@ -128,4 +136,4 @@ public class BelownameManager implements Listener {
             return 0;
         }
     }
-}
+    }
