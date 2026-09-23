@@ -81,30 +81,30 @@ public class AmethystToolListener implements Listener {
     }
 
     private void breakRadius(BlockBreakEvent event, Player player, ItemStack item, String toolType) {
-        event.setCancelled(true);
-
         Block center = event.getBlock();
 
-        if (!canBreak(player, center)) return;
+        if (!canBreak(player, center)) {
+            event.setCancelled(true);
+            return;
+        }
 
         ConfigurationSection section = module.getConfig().getConfigurationSection("tools." + toolType);
         int radius = section != null ? section.getInt("radius", 1) : 1;
 
         BlockFace face = getTargetFace(player);
 
-        List<Block> toBreak = new ArrayList<>();
-        toBreak.add(center);
+        List<Block> extraBlocks = new ArrayList<>();
         for (int x = -radius; x <= radius; x++) {
             for (int y = -radius; y <= radius; y++) {
                 Block relative = offsetBlock(center, face, x, y);
                 if (relative.equals(center)) continue;
                 if (relative.getType() == Material.AIR) continue;
                 if (!canBreak(player, relative)) continue;
-                toBreak.add(relative);
+                extraBlocks.add(relative);
             }
         }
 
-        for (Block block : toBreak) {
+        for (Block block : extraBlocks) {
             block.breakNaturally(item);
         }
 
