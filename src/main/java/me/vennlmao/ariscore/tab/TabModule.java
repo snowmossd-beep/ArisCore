@@ -9,6 +9,7 @@ import me.vennlmao.ariscore.tab.managers.PapiManager;
 import me.vennlmao.ariscore.tab.managers.ScoreboardManager;
 import me.vennlmao.ariscore.tab.managers.TabConfigManager;
 import me.vennlmao.ariscore.tab.managers.TabListManager;
+import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.Scoreboard;
 import me.vennlmao.ariscore.LicenseManager;
 
@@ -33,7 +34,7 @@ public class TabModule {
             plugin.getLogger().severe("[ArisCore] TabModule disabled: invalid license.");
             return;
         }
-        sharedScoreboard   = null;
+        sharedScoreboard   = Bukkit.getScoreboardManager().getNewScoreboard();
         configManager      = new TabConfigManager(plugin);
         configManager.load();
 
@@ -42,7 +43,7 @@ public class TabModule {
         tabListManager     = new TabListManager(plugin, papiManager, conditionEvaluator, configManager);
         scoreboardManager  = new ScoreboardManager(plugin, papiManager, conditionEvaluator, configManager);
         nameTagManager     = new NameTagManager(plugin, papiManager, configManager, sharedScoreboard);
-        belownameManager   = new BelownameManager(plugin, papiManager, configManager);
+        belownameManager   = new BelownameManager(plugin, papiManager, configManager, sharedScoreboard);
 
         plugin.getServer().getPluginManager().registerEvents(tabListManager,    plugin);
         plugin.getServer().getPluginManager().registerEvents(scoreboardManager, plugin);
@@ -86,4 +87,4 @@ public class TabModule {
     public NameTagManager    getNameTagManager()     { return nameTagManager; }
     public BelownameManager  getBelownameManager()   { return belownameManager; }
     public Scoreboard        getSharedScoreboard()   { return sharedScoreboard; }
-}
+                }
