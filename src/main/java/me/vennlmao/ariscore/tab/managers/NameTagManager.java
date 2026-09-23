@@ -26,14 +26,16 @@ public class NameTagManager implements Listener {
     private final ArisCore plugin;
     private final PapiManager papi;
     private final TabConfigManager config;
+    private final Scoreboard sharedScoreboard;
 
     private final Map<UUID, ScheduledTask> tasks   = new ConcurrentHashMap<>();
     private final Map<UUID, String>        lastTag = new ConcurrentHashMap<>();
 
-    public NameTagManager(ArisCore plugin, PapiManager papi, TabConfigManager config, Scoreboard ignored) {
+    public NameTagManager(ArisCore plugin, PapiManager papi, TabConfigManager config, Scoreboard sharedScoreboard) {
         this.plugin = plugin;
         this.papi   = papi;
         this.config = config;
+        this.sharedScoreboard = sharedScoreboard;
     }
 
     public void start() {
@@ -84,6 +86,15 @@ public class NameTagManager implements Listener {
     private void tick(Player player) {
         if (!player.isOnline()) return;
 
+        if (sharedScoreboard != null && !sharedScoreboard.equals(player.getScoreboard())) {
+            try {
+                player.setScoreboard(sharedScoreboard);
+            } catch (Throwable e) {
+                plugin.getLogger().log(Level.WARNING, "[Tab/Nametag] Failed to assign shared scoreboard to "
+                        + player.getName(), e);
+            }
+        }
+
         String template = config.getNametagTag();
         int idx = template.indexOf(NAME_PLACEHOLDER);
         String prefixTemplate = idx >= 0 ? template.substring(0, idx) : template;
@@ -106,20 +117,14 @@ public class NameTagManager implements Listener {
     private void applyToAllBoards(Player player, String prefix, String suffix) {
         try {
             if (!player.isOnline()) return;
+            if (sharedScoreboard == null) return;
 
             String rawName   = player.getName();
             int maxLen       = 16 - TEAM_PREFIX.length();
             String shortName = rawName.length() > maxLen ? rawName.substring(0, maxLen) : rawName;
             String teamName  = TEAM_PREFIX + shortName;
 
-            Scoreboard sb = player.getScoreboard();
-            if (sb != null) applyTeam(sb, teamName, rawName, prefix, suffix);
-
-            Scoreboard main = Bukkit.getScoreboardManager() != null
-                    ? Bukkit.getScoreboardManager().getMainScoreboard() : null;
-            if (main != null && !main.equals(sb)) {
-                applyTeam(main, teamName, rawName, prefix, suffix);
-            }
+            applyTeam(sharedScoreboard, teamName, rawName, prefix, suffix);
 
         } catch (Throwable e) {
             plugin.getLogger().log(Level.WARNING, "[Tab/Nametag] Failed to apply team for "
@@ -148,4 +153,4 @@ public class NameTagManager implements Listener {
         if (s == null) return "";
         return s.length() > max ? s.substring(0, max) : s;
     }
-                }
+}
