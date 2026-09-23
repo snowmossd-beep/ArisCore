@@ -1,5 +1,11 @@
 package me.vennlmao.ariscore.amethyst.listeners;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.vennlmao.ariscore.amethyst.AmethystModule;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -33,9 +39,11 @@ public class AmethystToolListener implements Listener {
             Material.NETHER_WART);
 
     private final AmethystModule module;
+    private final boolean worldGuardEnabled;
 
     public AmethystToolListener(AmethystModule module) {
         this.module = module;
+        this.worldGuardEnabled = Bukkit.getPluginManager().getPlugin("WorldGuard") != null;
     }
 
     @EventHandler
@@ -75,10 +83,13 @@ public class AmethystToolListener implements Listener {
     private void breakRadius(BlockBreakEvent event, Player player, ItemStack item, String toolType) {
         event.setCancelled(true);
 
+        Block center = event.getBlock();
+
+        if (!canBreak(player, center)) return;
+
         ConfigurationSection section = module.getConfig().getConfigurationSection("tools." + toolType);
         int radius = section != null ? section.getInt("radius", 1) : 1;
 
-        Block center = event.getBlock();
         BlockFace face = getTargetFace(player);
 
         List<Block> toBreak = new ArrayList<>();
@@ -88,6 +99,7 @@ public class AmethystToolListener implements Listener {
                 Block relative = offsetBlock(center, face, x, y);
                 if (relative.equals(center)) continue;
                 if (relative.getType() == Material.AIR) continue;
+                if (!canBreak(player, relative)) continue;
                 toBreak.add(relative);
             }
         }
@@ -98,6 +110,21 @@ public class AmethystToolListener implements Listener {
 
         spawnParticles(player, center.getLocation(), "tools." + toolType);
         playToolSound(player, center.getLocation(), "tools." + toolType);
+    }
+
+    private boolean canBreak(Player player, Block block) {
+        Set<String> blockedBlocks = new HashSet<>(module.getConfig().getStringList("tools.blocked-blocks"));
+        if (blockedBlocks.contains(block.getType().name())) return false;
+
+        if (!worldGuardEnabled) return true;
+        try {
+            RegionQuery query = WorldGuard.getInstance().getPlatform()
+                    .getRegionContainer().createQuery();
+            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+            return query.testState(BukkitAdapter.adapt(block.getLocation()), localPlayer, Flags.BLOCK_BREAK);
+        } catch (Throwable t) {
+            return true;
+        }
     }
 
     private BlockFace getTargetFace(Player player) {
@@ -286,5 +313,4 @@ public class AmethystToolListener implements Listener {
             player.getWorld().playSound(location, sound, volume, pitch);
         } catch (IllegalArgumentException ignored) {}
     }
-                }
-                              
+    }
