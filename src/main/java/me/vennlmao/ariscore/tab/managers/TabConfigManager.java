@@ -28,15 +28,6 @@ public class TabConfigManager {
     private long scoreboardUpdateTicks;
     private List<ScoreboardProfile> scoreboardProfiles = new ArrayList<>();
 
-    private boolean nametagEnabled;
-    private String nametagTag;
-    private long nametagUpdateTicks;
-
-    private boolean belownameEnabled;
-    private String belownameText;
-    private String belownameValuePlaceholder;
-    private long belownameUpdateTicks;
-
     public TabConfigManager(ArisCore plugin) {
         this.plugin = plugin;
     }
@@ -58,15 +49,6 @@ public class TabConfigManager {
 
         tabEnabled    = tabCfg.getBoolean("enabled", true);
         tabProfiles   = parseTabProfiles(tabCfg);
-
-        nametagEnabled      = tabCfg.getBoolean("nametag.enabled", true);
-        nametagTag          = tabCfg.getString("nametag.tag", "");
-        nametagUpdateTicks  = tabCfg.getLong("nametag.update-interval-ticks", 40L);
-
-        belownameEnabled            = tabCfg.getBoolean("belowname-objective.enabled", false);
-        belownameText               = tabCfg.getString("belowname-objective.text", "");
-        belownameValuePlaceholder   = tabCfg.getString("belowname-objective.value-placeholder", "");
-        belownameUpdateTicks        = tabCfg.getLong("belowname-objective.update-interval-ticks", 20L);
 
         scoreboardEnabled  = sbCfg.getBoolean("enabled", true);
         scoreboardProfiles = parseScoreboardProfiles(sbCfg);
@@ -144,12 +126,5 @@ public class TabConfigManager {
     public long getScoreboardUpdateTicks()             { return scoreboardUpdateTicks; }
     public List<ScoreboardProfile> getScoreboardProfiles() { return scoreboardProfiles; }
 
-    public boolean isNametagEnabled()   { return nametagEnabled; }
-    public String getNametagTag()       { return nametagTag; }
-    public long getNametagUpdateTicks() { return nametagUpdateTicks; }
 
-    public boolean isBelownameEnabled()          { return belownameEnabled; }
-    public String getBelownameText()             { return belownameText; }
-    public String getBelownameValuePlaceholder() { return belownameValuePlaceholder; }
-    public long getBelownameUpdateTicks()        { return belownameUpdateTicks; }
-    }
+            }
