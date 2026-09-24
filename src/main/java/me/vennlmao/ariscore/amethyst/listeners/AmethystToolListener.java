@@ -33,6 +33,7 @@ public class AmethystToolListener implements Listener {
             Material.NETHER_WART);
 
     private final AmethystModule module;
+    private final Set<Block> probingBlocks = new HashSet<>();
 
     public AmethystToolListener(AmethystModule module) {
         this.module = module;
@@ -40,6 +41,8 @@ public class AmethystToolListener implements Listener {
 
     @EventHandler
     public void onBreak(BlockBreakEvent event) {
+        if (probingBlocks.contains(event.getBlock())) return;
+
         Player player = event.getPlayer();
         ItemStack item = player.getInventory().getItemInMainHand();
 
@@ -108,9 +111,14 @@ public class AmethystToolListener implements Listener {
         Set<String> blockedBlocks = new HashSet<>(module.getConfig().getStringList("tools.blocked-blocks"));
         if (blockedBlocks.contains(block.getType().name())) return false;
 
-        BlockBreakEvent probe = new BlockBreakEvent(block, player);
-        Bukkit.getPluginManager().callEvent(probe);
-        return !probe.isCancelled();
+        probingBlocks.add(block);
+        try {
+            BlockBreakEvent probe = new BlockBreakEvent(block, player);
+            Bukkit.getPluginManager().callEvent(probe);
+            return !probe.isCancelled();
+        } finally {
+            probingBlocks.remove(block);
+        }
     }
 
     private BlockFace getTargetFace(Player player) {
@@ -299,4 +307,4 @@ public class AmethystToolListener implements Listener {
             player.getWorld().playSound(location, sound, volume, pitch);
         } catch (IllegalArgumentException ignored) {}
     }
-    }
+        }
