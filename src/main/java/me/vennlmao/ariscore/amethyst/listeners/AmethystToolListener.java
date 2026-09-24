@@ -1,11 +1,5 @@
 package me.vennlmao.ariscore.amethyst.listeners;
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.vennlmao.ariscore.amethyst.AmethystModule;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -39,11 +33,9 @@ public class AmethystToolListener implements Listener {
             Material.NETHER_WART);
 
     private final AmethystModule module;
-    private final boolean worldGuardEnabled;
 
     public AmethystToolListener(AmethystModule module) {
         this.module = module;
-        this.worldGuardEnabled = Bukkit.getPluginManager().getPlugin("WorldGuard") != null;
     }
 
     @EventHandler
@@ -116,15 +108,9 @@ public class AmethystToolListener implements Listener {
         Set<String> blockedBlocks = new HashSet<>(module.getConfig().getStringList("tools.blocked-blocks"));
         if (blockedBlocks.contains(block.getType().name())) return false;
 
-        if (!worldGuardEnabled) return true;
-        try {
-            RegionQuery query = WorldGuard.getInstance().getPlatform()
-                    .getRegionContainer().createQuery();
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-            return query.testState(BukkitAdapter.adapt(block.getLocation()), localPlayer, Flags.BLOCK_BREAK);
-        } catch (Throwable t) {
-            return true;
-        }
+        BlockBreakEvent probe = new BlockBreakEvent(block, player);
+        Bukkit.getPluginManager().callEvent(probe);
+        return !probe.isCancelled();
     }
 
     private BlockFace getTargetFace(Player player) {
