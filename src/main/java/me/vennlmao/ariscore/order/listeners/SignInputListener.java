@@ -38,7 +38,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class SignInputListener implements Listener {
    private final JavaPlugin plugin;
-   private final String marker;
+   private String marker;
    private final Map<UUID, SignInputListener.Session> sessions = new ConcurrentHashMap<>();
    private final boolean protocolAvailable;
    private PacketAdapter signPacketListener;
@@ -48,6 +48,10 @@ public final class SignInputListener implements Listener {
       this.marker = marker;
       this.protocolAvailable = plugin.getServer().getPluginManager().getPlugin("ProtocolLib") != null;
       this.registerProtocolListener();
+   }
+
+   public void setMarker(String marker) {
+      this.marker = marker;
    }
 
    public void open(Player player, Consumer<String> onSubmit, Runnable onCancel) {
@@ -297,4 +301,5 @@ public final class SignInputListener implements Listener {
          this.onCancel = onCancel;
       }
    }
-}
+                     }
+                              
