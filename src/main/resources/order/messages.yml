@@ -1,0 +1,10 @@
+messages:
+  cannot_deliver_own_order: "<red>You cannot deliver to your own order."
+  no_items_to_collect: "<red>You have no items to collect."
+  enchants_conflict: "<red>Those enchantments cannot be combined."
+  delivery_progress_actionbar: "<gray>Delivering{dots}"
+  delivery_success: "<gray>You delivered <color:#08FB7B>{amount} {item}</color> and received <color:#08FB7B>${money}</color>"
+  owner_delivery_notification: "<gray>{deliverer} delivered you <color:#08FB7B>{amount} {item}</color>"
+  order_cancelled_refund: "<gray>Order cancelled. Refunded <color:#08FB7B>${refund}</color> for <color:#08FB7B>{undelivered}</color> undelivered {item}."
+  order_cancelled_no_refund: "<gray>Order cancelled. All items were already delivered."
+  not_enough_money: "<red>You don't have enough money to create this order."

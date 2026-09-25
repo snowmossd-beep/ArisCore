@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────
+#  Your Orders GUI  (My orders — 27 slots)
+# ─────────────────────────────────────────────
+your-orders-gui:
+  title: "ᴏʀᴅᴇʀs -> Your Orders"
+  size: 27
+  # New Order button is placed at orders.size() capped to max-new-order-slot
+  max-new-order-slot: 26
+
+  new-order-button:
+    material: PAPER
+    name: "New Order"
+    lore:
+      - "Click to create new order"
+
+# ─────────────────────────────────────────────
+#  New Order GUI  (Create order — 27 slots)
+# ─────────────────────────────────────────────
+new-order-gui:
+  title: "ᴏʀᴅᴇʀs -> New Order"
+  size: 27
+
+  cancel-button:
+    slot: 10
+    material: RED_STAINED_GLASS_PANE
+    name: "ᴄᴀɴᴄᴇʟ"
+    lore:
+      - "Click to return"
+
+  item-button:
+    slot: 12
+    # Material is dynamic (shows selected item or fallback below)
+    fallback-material: STONE
+    name: "ɪᴛᴇᴍ"
+    lore:
+      - "Click to choose item"
+
+  amount-button:
+    slot: 13
+    material: CHEST
+    name: "ᴀᴍᴏᴜɴᴛ"
+    lore:
+      - "Click to type number of items"
+
+  price-button:
+    slot: 14
+    material: EMERALD
+    name: "ᴘʀɪᴄᴇ"
+    lore:
+      - "Click to type the price per item"
+
+  confirm-button:
+    slot: 16
+    material: LIME_STAINED_GLASS_PANE
+    name: "ᴄᴏɴғɪʀᴍ"
+    lore:
+      - "Click to confirm order"

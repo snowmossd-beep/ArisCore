@@ -1,0 +1,35 @@
+enchant-pick-gui:
+  title: "ᴘɪᴄᴋ ᴇɴᴄʜᴀɴᴛᴍᴇɴᴛꜱ"
+  back-button-name: "Back"
+  next-button-name: "Next"
+  book-click-to-select-lore: "Click to select"
+  book-selected-lore: "Selected"
+  book-cannot-add-lore: "Cannot add this enchantment"
+  cancel-button-name: "Cancel"
+  cancel-button-lore: "Click to go back"
+  confirm-button-name: "Confirm"
+  confirm-button-lore: "Click to confirm enchantments"
+
+deliver-items-gui:
+  title-part1: "ᴏʀᴅᴇʀs"
+  title-part2: " -> Deliver Items"
+
+orders-gui:
+  deliver-lore: "Click to deliver {player} {item}"
+  bullet: "▪ "
+
+select-item-gui:
+  bullet: "▪ "
+
+confirm-delivery-gui:
+  price-lore: "(${amount})"
+  delivering-lore: "You're delivering {amount} {item}"
+
+new-order-gui:
+  price-lore: "(${amount})"
+  total-lore: "(Total: ${amount})"
+
+your-orders-gui:
+  each-suffix: " each"
+  delivered-suffix: " Delivered"
+  paid-suffix: " Paid"

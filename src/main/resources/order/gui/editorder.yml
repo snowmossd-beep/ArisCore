@@ -1,0 +1,97 @@
+# ─────────────────────────────────────────────
+#  Edit Order GUI  (Modify your order — 27 slots)
+# ─────────────────────────────────────────────
+edit-order-gui:
+  title: "ᴏʀᴅᴇʀs -> Edit Order"
+  size: 27
+  order-item-slot: 10
+  cancel-button-slot: 13
+  collect-button-slot: 15
+  filler-slots: [0, 1, 2, 9, 11, 18, 19, 20]
+  filler-material: BLACK_STAINED_GLASS_PANE
+
+  cancel-button:
+    material: RED_CONCRETE
+    name: "ᴄᴀɴᴄᴇʟ"
+    lore:
+      - "Click to cancel this order"
+
+  collect-button:
+    material: CHEST
+    name: "ᴄᴏʟʟᴇᴄᴛ"
+    lore:
+      - "Click to collect items"
+
+# ─────────────────────────────────────────────
+#  Cancel Order GUI  (Confirm cancel — 27 slots)
+# ─────────────────────────────────────────────
+cancel-order-gui:
+  title: "ᴏʀᴅᴇʀs -> Cancel Order"
+  size: 27
+  back-button-slot: 10
+  order-item-slot: 13
+  confirm-button-slot: 16
+
+  back-button:
+    material: RED_STAINED_GLASS_PANE
+    name: "ᴄᴀɴᴄᴇʟ"
+    lore:
+      - "Click to return"
+
+  confirm-button:
+    material: LIME_STAINED_GLASS_PANE
+    name: "ᴄᴏɴғɪʀᴍ"
+    lore:
+      - "Click to cancel order"
+
+# ─────────────────────────────────────────────
+#  Confirm Delivery GUI  (27 slots)
+# ─────────────────────────────────────────────
+confirm-delivery-gui:
+  title: "ᴏʀᴅᴇʀs -> Confirm Delivery"
+  size: 27
+  cancel-button-slot: 11
+  preview-item-slot: 13
+  confirm-button-slot: 15
+
+  cancel-button:
+    material: RED_STAINED_GLASS_PANE
+    name: "ᴄᴀɴᴄᴇʟ"
+    lore:
+      - "Click to go back"
+
+  confirm-button:
+    material: LIME_STAINED_GLASS_PANE
+    name: "ᴄᴏɴғɪʀᴍ"
+    lore:
+      - "Click to deliver items"
+
+# ─────────────────────────────────────────────
+#  Collect Items GUI  (54 slots)
+# ─────────────────────────────────────────────
+collect-items-gui:
+  title: "ᴏʀᴅᴇʀs -> Collect Items"
+  size: 54
+  page-size: 45
+  filler-material: GRAY_STAINED_GLASS_PANE
+
+  back-button:
+    slot: 45
+    material: ARROW
+    name: "ʙᴀᴄᴋ"
+    lore:
+      - "Click to go to the previous page"
+
+  drop-loot-button:
+    slot: 49
+    material: DISPENSER
+    name: "ᴅʀᴏᴘ ʟᴏᴏᴛ"
+    lore:
+      - "Click to drop all loot on this page"
+
+  next-button:
+    slot: 53
+    material: ARROW
+    name: "ɴᴇxᴛ"
+    lore:
+      - "Click to go to the next page"

@@ -1,0 +1,128 @@
+# ─────────────────────────────────────────────
+#  Order GUI  (Browse all orders — 54 slots)
+# ─────────────────────────────────────────────
+order-gui:
+  title: "ᴏʀᴅᴇʀs (Page {page})"
+  size: 54
+  # Slots 0-44 are used for order items (max = size - 9)
+  items-max-slot: 44
+
+  back-button:
+    slot: 45
+    material: ARROW
+    name: "ʙᴀᴄᴋ"
+    lore:
+      - "Click to go to the previous page"
+
+  sort-button:
+    slot: 47
+    material: CAULDRON
+    name: "sᴏʀᴛ"
+
+  filter-button:
+    slot: 48
+    material: HOPPER
+    name: "ғɪʟᴛᴇʀ"
+
+  refresh-button:
+    slot: 49
+    material: MAP
+    name: "ʀᴇғʀᴇsʜ"
+    lore:
+      - "Click to refresh"
+
+  search-button:
+    slot: 50
+    material: OAK_SIGN
+    name: "sᴇᴀʀᴄʜ"
+    lore:
+      - "Click to search"
+
+  your-orders-button:
+    slot: 51
+    material: CHEST
+    name: "ʏᴏᴜʀ ᴏʀᴅᴇʀs"
+    lore:
+      - "Click to view your orders"
+
+  next-button:
+    slot: 53
+    material: ARROW
+    name: "ɴᴇxᴛ"
+    lore:
+      - "Click to go to the next page"
+
+  sorts:
+    - "Most Paid"
+    - "Most Delivered"
+    - "Recently Listed"
+    - "Most Money Per Item"
+
+  filters:
+    - "All"
+    - "Blocks"
+    - "Tools"
+    - "Food"
+    - "Combat"
+    - "Potions"
+    - "Books"
+    - "Ingredients"
+    - "Utilities"
+
+# ─────────────────────────────────────────────
+#  Select Item GUI  (Choose item — 54 slots)
+# ─────────────────────────────────────────────
+select-item-gui:
+  title: "ᴏʀᴅᴇʀs -> Select Item"
+  size: 54
+  # Slots 0-43 are used for material items (max = size - 10)
+  items-max-slot: 43
+
+  filler-slot: 44
+  filler-material: BLACK_STAINED_GLASS_PANE
+
+  back-button:
+    slot: 45
+    material: ARROW
+    name: "ʙᴀᴄᴋ"
+    lore:
+      - "Click to go to the previous page"
+
+  sort-button:
+    slot: 48
+    material: CAULDRON
+    name: "sᴏʀᴛ"
+
+  filter-button:
+    slot: 49
+    material: HOPPER
+    name: "ғɪʟᴛᴇʀ"
+
+  search-button:
+    slot: 50
+    material: OAK_SIGN
+    name: "sᴇᴀʀᴄʜ"
+    lore:
+      - "Click to search"
+
+  next-button:
+    slot: 53
+    material: ARROW
+    name: "ɴᴇxᴛ"
+    lore:
+      - "Click to go to the next page"
+
+  sorts:
+    - "A-Z"
+    - "Z-A"
+
+  filters:
+    - "All"
+    - "Blocks"
+    - "Tools"
+    - "Food"
+    - "Combat"
+    - "Potions"
+    - "Books"
+    - "Ingredients"
+    - "Utilities"

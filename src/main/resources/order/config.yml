@@ -1,0 +1,36 @@
+sign-input:
+  marker: "↑↑↑↑↑↑↑↑↑↑↑"
+
+sounds:
+  page-turn:
+    sound: ITEM_BOOK_PAGE_TURN
+    volume: 1.0
+    pitch: 1.0
+  refresh:
+    sound: UI_TOAST_IN
+    volume: 1.0
+    pitch: 1.0
+  button-click:
+    sound: UI_BUTTON_CLICK
+    volume: 1.0
+    pitch: 1.0
+  deny:
+    sound: ENTITY_VILLAGER_NO
+    volume: 1.0
+    pitch: 1.0
+  collect-item:
+    sound: ENTITY_ITEM_PICKUP
+    volume: 1.0
+    pitch: 1.0
+  drop-loot:
+    sound: ENTITY_CHICKEN_EGG
+    volume: 1.0
+    pitch: 0.9
+  delivery-progress:
+    sound: ENTITY_MINECART_RIDING
+    volume: 0.7
+    pitch: 1.0
+  delivery-success:
+    sound: ENTITY_EXPERIENCE_ORB_PICKUP
+    volume: 1.0
+    pitch: 1.2
