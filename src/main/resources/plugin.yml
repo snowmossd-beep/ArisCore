@@ -11,6 +11,7 @@ softdepend:
   - WorldGuard
   - WorldEdit
   - LuckPerms
+  - ProtocolLib
 
 commands:
   rtp:
@@ -135,7 +136,7 @@ commands:
     permission: ariscore.tab.admin
   order:
     description: Open the order system
-    usage: /order [my|new|reload]
+    usage: /order [reload]
     permission: ariscore.order.use
     permission-message: "&cYou do not have permission!"
   setspawn:
