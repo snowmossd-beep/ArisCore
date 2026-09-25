@@ -69,7 +69,7 @@ public final class YourOrdersGui {
       List<Component> lore = this.gui
          .yourOrdersGuiNewOrderLore()
          .stream()
-         .map(l -> Component.text(l, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false))
+         .map(l -> (Component) Component.text(l, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false))
          .toList();
       meta.lore(lore);
       it.setItemMeta(meta);
@@ -135,4 +135,5 @@ public final class YourOrdersGui {
    private Component noItalic(Component c) {
       return c.decoration(TextDecoration.ITALIC, false);
    }
-}
+         }
+         
