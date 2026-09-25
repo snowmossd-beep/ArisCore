@@ -145,7 +145,7 @@ public final class OrdersGui {
    }
 
    private ItemStack btn(Material mat, String name, List<String> loreTxt) {
-      List<Component> lore = loreTxt.stream().map(l -> Component.text(l, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)).toList();
+      List<Component> lore = loreTxt.stream().map(l -> (Component) Component.text(l, NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)).toList();
       return this.btnC(mat, name, lore);
    }
 
@@ -170,4 +170,5 @@ public final class OrdersGui {
          return mod < 0 ? mod + size : mod;
       }
    }
-}
+         }
+         
