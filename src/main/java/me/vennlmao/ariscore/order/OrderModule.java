@@ -88,6 +88,7 @@ public class OrderModule {
         loadMessages();
         if (guiManager != null) guiManager.reload();
         if (ordersService != null) ordersService.setMessages(messages);
+        if (signInputListener != null) signInputListener.setMarker(config.getString("sign-input.marker", ""));
     }
 
     private void loadConfig() {
@@ -126,5 +127,5 @@ public class OrderModule {
     public GuiManager getGuiManager() { return guiManager; }
     public OrdersService getOrdersService() { return ordersService; }
     public DatabaseManager getDatabaseManager() { return databaseManager; }
-    }
-                                   
+            }
+            
