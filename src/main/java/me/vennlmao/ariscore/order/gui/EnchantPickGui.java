@@ -19,7 +19,11 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public final class EnchantPickGui {
-   public static final String TITLE = "ᴘɪᴄᴋ ᴇɴᴄʜᴀɴᴛᴍᴇɴᴛꜱ";
+   private final GuiManager gui;
+
+   public EnchantPickGui(GuiManager gui) {
+      this.gui = gui;
+   }
 
    public Inventory create(Material material, EnchantPickState state, List<EnchantPickGui.EnchantEntry> enchants) {
       Component title = Component.text(this.gui.enchantPickGuiTitle(), NamedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, false);
@@ -145,4 +149,5 @@ public final class EnchantPickGui {
 
    public record EnchantEntry(Enchantment enchantment, int level) {
    }
-}
+   }
+            
