@@ -127,3 +127,4 @@ public class OrderModule {
     public OrdersService getOrdersService() { return ordersService; }
     public DatabaseManager getDatabaseManager() { return databaseManager; }
     }
+                                   
