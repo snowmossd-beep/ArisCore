@@ -8,3 +8,5 @@ messages:
   order_cancelled_refund: "<gray>Order cancelled. Refunded <color:#08FB7B>${refund}</color> for <color:#08FB7B>{undelivered}</color> undelivered {item}."
   order_cancelled_no_refund: "<gray>Order cancelled. All items were already delivered."
   not_enough_money: "<red>You don't have enough money to create this order."
+  no_permission: "<red>You do not have permission to do that."
+  order_reloaded: "<green>Order module reloaded."
