@@ -69,7 +69,7 @@ public class OrderModule {
         }
 
         if (plugin.getCommand("order") != null) {
-            plugin.getCommand("order").setExecutor(new OrdersCommand(ordersService));
+            plugin.getCommand("order").setExecutor(new OrdersCommand(ordersService, this));
         }
 
         plugin.getServer().getPluginManager().registerEvents(signInputListener, plugin);
@@ -126,4 +126,4 @@ public class OrderModule {
     public GuiManager getGuiManager() { return guiManager; }
     public OrdersService getOrdersService() { return ordersService; }
     public DatabaseManager getDatabaseManager() { return databaseManager; }
-}
+    }
